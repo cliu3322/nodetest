@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var apis = require('./routes/apis');
+var {authenticate, authError} = require('./middleware');
 
 var app = express();
 
@@ -21,6 +23,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+app.use('/api', apis);
+
+
+app.use('/api/secret', [authenticate, authError]);
+app.post('/api/secret/test', (req, res) => {
+	res.json({
+		status: 200,
+		message: 'succcesful',
+	});
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
