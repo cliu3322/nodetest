@@ -7,7 +7,7 @@
 /coverage
 
 # production
-/build
+
 __snapshots__
 # misc
 .DS_Store
