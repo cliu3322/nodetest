@@ -9,8 +9,8 @@
   "azure": {
     "username": "test",
     "password": "Baza7183!",
-    "database": "testdb",
-    "host": "claimdbserver.database.windows.net",
+    "database": "claims",
+    "host": "regency-claims.database.windows.net",
     "dialect": "mssql",
     "dialectOptions":{"options": {"encrypt": true}}
   },
