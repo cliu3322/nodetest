@@ -26,7 +26,6 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const response = {};
 	// You can use DB checking here
 	const user = await models.User.findOne({ where: {userName: username, password:password} });
-	console.log(user)
 	if (user !== null && user !== '') {
 		response.token = jsonwebtoken.sign(
 			{
@@ -54,7 +53,6 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	} else {
 
     const userinput = await models.User.create({ userName: username, password: password, email:email, firstName:firstname, lastName:lastname });
-    console.log("userinput",userinput)
     response.token = jsonwebtoken.sign(
 			{
 				expiredAt: new Date().getTime() + expiredAfter,
@@ -71,7 +69,6 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
 router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.body)
 	const { plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
   cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
   billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
@@ -90,7 +87,6 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
     cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
     billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
     account_holder_name, bank_name, bank_address, swift_address, iban_code});
-    console.log(input.dataValues)
 		response.claimID = input.dataValues.id;
 
 	 }
@@ -113,7 +109,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
     const claims = await models.ClaimBasic.findAll({attributes: ['id', 'plan_name']});
-    console.log('claims',claims)
 		response.claimID = claims
 	 }
 
@@ -123,8 +118,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
 router.get('/claimByID', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.body)
-  console.log(req.match)
  	 res.json('response');
 	})
 );

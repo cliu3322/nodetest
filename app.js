@@ -25,9 +25,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'public')));
-//app.use('/', indexRouter);
+
 
 //app.use('/', indexRouter);
+//
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('*', function(req, res) {
@@ -47,8 +48,11 @@ app.post('/api/secret/test', (req, res) => {
 	res.json({
 		status: 200,
 		message: 'succcesful',
+    env: process.env
 	});
 });
+
+console.log('server env',process.env)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

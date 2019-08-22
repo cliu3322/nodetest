@@ -4,6 +4,7 @@ var Config = require('./config');
 const { secretKey } = Config;
 
 const authenticate = (req, res, next) => {
+	console.log('middleware')
 	const token = req.headers.authorization || '';
 	jsonwebtoken.verify(token, secretKey, (error, decoded) => {
 		if (error) {
