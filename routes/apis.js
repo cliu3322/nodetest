@@ -11,6 +11,7 @@ const { secretKey, expiredAfter } = Config;
 
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
+  console.log('awaitErorrHandlerFactory')
   return async (req, res, next) => {
     try {
       await middleware(req, res, next);
@@ -20,6 +21,12 @@ const awaitErorrHandlerFactory = middleware => {
   };
 };
 
+router.post('/checkServerVariable', awaitErorrHandlerFactory(async (req, res, next) => {
+	const response = {};
+	// You can use DB checking here
+  response.variable = process.env;
+	res.json(response);
+}));
 
 router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const { username, password } = req.body;

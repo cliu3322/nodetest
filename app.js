@@ -52,7 +52,7 @@ app.post('/api/secret/test', (req, res) => {
 	});
 });
 
-console.log('server env',process.env)
+//console.log('server env',process.env)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
