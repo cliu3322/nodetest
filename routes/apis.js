@@ -55,10 +55,10 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	// You can use DB checking here
 	//doesUserEverExists
 
-	if(false) {
-		response.error = 'Not found';
+  const user = await models.User.findOne({ where: {userName: username} });
+	if(user !== null) {
+		response.error = 'User name not available! Please change another one.';
 	} else {
-
     const userinput = await models.User.create({ userName: username, password: password, email:email, firstName:firstname, lastName:lastname });
     response.token = jsonwebtoken.sign(
 			{
