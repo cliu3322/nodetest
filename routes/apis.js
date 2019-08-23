@@ -1,5 +1,6 @@
 //https://arjunphp.com/restful-api-using-async-await-node-express-sequelize/
 var jsonwebtoken = require ('jsonwebtoken');
+var bcrypt = require('bcryptjs');
 var Config = require ('../config');
 //var models  = require('../models');
 var express = require('express');
@@ -32,8 +33,12 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const { username, password } = req.body;
 	const response = {};
 	// You can use DB checking here
-	const user = await models.User.findOne({ where: {userName: username, password:password} });
-	if (user !== null && user !== '') {
+	const user = await models.User.findOne({ where: {userName: username} });
+
+  console.log('password', password)
+  console.log('hash', user.dataValues.password)
+  console.log(bcrypt.compareSync(password, user.dataValues.password))
+	if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
 		response.token = jsonwebtoken.sign(
 			{
 				expiredAt: new Date().getTime() + expiredAfter,
@@ -59,7 +64,8 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	if(user !== null) {
 		response.error = 'User name not available! Please change another one.';
 	} else {
-    const userinput = await models.User.create({ userName: username, password: password, email:email, firstName:firstname, lastName:lastname });
+    var hash = bcrypt.hashSync(password, 8);
+    const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
     response.token = jsonwebtoken.sign(
 			{
 				expiredAt: new Date().getTime() + expiredAfter,
