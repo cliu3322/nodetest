@@ -15,8 +15,7 @@ const { secretKey, expiredAfter } = Config;
 router.use('/secret', [authenticate, authError]);
 router.get('/secret/test', (req, res) => {
   const {body,data} = req
-  console.log('wtf')
-  console.log({body,data})
+
 	res.json({
 		status: 200,
 		message: 'succcesful',
@@ -26,7 +25,7 @@ router.get('/secret/test', (req, res) => {
 
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
-  console.log('awaitErorrHandlerFactory')
+
   return async (req, res, next) => {
     try {
       await middleware(req, res, next);
@@ -44,13 +43,12 @@ router.post('/checkServerVariable', awaitErorrHandlerFactory(async (req, res, ne
 }));
 
 router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log()
+
 	const { username, password } = req.body;
 	const response = {};
 	// You can use DB checking here
 	const user = await models.User.findOne({ where: {userName: username} });
 
-  console.log('user', user)
 	if (user === null) {
 		response.error = 'Not found';
 	} else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
@@ -66,7 +64,6 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
    else {
 		response.error = 'Some server error';
 	}
-  console.log('response',response)
 	res.json(response);
 }));
 
@@ -117,8 +114,9 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
     cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
     billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
     account_holder_name, bank_name, bank_address, swift_address, iban_code});
-		response.claimID = input.dataValues.id;
 
+		response.claimID = input.dataValues.id;
+    console.log(response)
 	 }
  		res.json(response);
 	})
