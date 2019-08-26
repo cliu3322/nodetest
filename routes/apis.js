@@ -50,10 +50,12 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const response = {};
 	// You can use DB checking here
 	const user = await models.User.findOne({ where: {userName: username} });
-
+  console.log('compare', bcrypt.compareSync(password, user.dataValues.password));
 	if (user === null) {
 		response.error = 'Not found';
-	} else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
+	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
+    response.error = 'password and username do not match';
+  } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
     response.token = jsonwebtoken.sign(
       {
         expiredAt: new Date().getTime() + expiredAfter,
