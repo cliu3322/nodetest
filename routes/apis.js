@@ -7,8 +7,22 @@ var express = require('express');
 var router  = express.Router();
 var models  = require('../models');
 
+
+var {authenticate, authError} = require('../middleware');
+
 const { secretKey, expiredAfter } = Config;
 
+router.use('/secret', [authenticate, authError]);
+router.get('/secret/test', (req, res) => {
+  const {body,data} = req
+  console.log('wtf')
+  console.log({body,data})
+	res.json({
+		status: 200,
+		message: 'succcesful',
+    env: process.env
+	});
+});
 
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
@@ -30,26 +44,29 @@ router.post('/checkServerVariable', awaitErorrHandlerFactory(async (req, res, ne
 }));
 
 router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log()
 	const { username, password } = req.body;
 	const response = {};
 	// You can use DB checking here
 	const user = await models.User.findOne({ where: {userName: username} });
 
-  console.log('password', password)
-  console.log('hash', user.dataValues.password)
-  console.log(bcrypt.compareSync(password, user.dataValues.password))
-	if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
-		response.token = jsonwebtoken.sign(
-			{
-				expiredAt: new Date().getTime() + expiredAfter,
-				username,
-				id: 1,
-			},
-			secretKey
-		);
-	} else {
+  console.log('user', user)
+	if (user === null) {
 		response.error = 'Not found';
+	} else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
+    response.token = jsonwebtoken.sign(
+      {
+        expiredAt: new Date().getTime() + expiredAfter,
+        username,
+        id: 1,
+      },
+      secretKey
+    );
+  }
+   else {
+		response.error = 'Some server error';
 	}
+  console.log('response',response)
 	res.json(response);
 }));
 
@@ -134,4 +151,7 @@ router.get('/claimByID', awaitErorrHandlerFactory(async (req, res, next) => {
  	 res.json('response');
 	})
 );
+
+
+
 module.exports = router;

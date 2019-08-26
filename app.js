@@ -31,9 +31,9 @@ app.use(cookieParser());
 //
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.get('*', function(req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+// app.get('/*', function(req, res) {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 app.use(cors())
 
@@ -41,16 +41,6 @@ app.use(cors())
 app.use('/users', usersRouter);
 
 app.use('/api', apis);
-
-
-app.use('/api/secret', [authenticate, authError]);
-app.post('/api/secret/test', (req, res) => {
-	res.json({
-		status: 200,
-		message: 'succcesful',
-    env: process.env
-	});
-});
 
 //console.log('server env',process.env)
 
