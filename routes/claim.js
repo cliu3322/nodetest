@@ -21,53 +21,51 @@ router.get('/', function(req, res, next) {
 
 
 router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
-	const { plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
+  const { plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
   cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
   billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
   account_holder_name, bank_name, bank_address, swift_address, iban_code } = req.body;
 
-	const response = {};
-	// You can use DB checking here
-	//doesUserEverExists
-
-	if(false) {
-		response.error = 'Not found';
-	} else {
+  const response = {};
+  // You can use DB checking here
+  //doesUserEverExists
 
 
+
+  try {
     const input = await models.ClaimBasic.create({ plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
     cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
     billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
     account_holder_name, bank_name, bank_address, swift_address, iban_code});
 
-		response.claimID = input.dataValues.id;
-    console.log(response)
-	 }
- 		res.json(response);
-	})
-);
+    response.claimID = input.dataValues.id;
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
+  res.json(response);
+}));
+
+
 
 
 
 
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
-	const response = {};
-	// You can use DB checking here
-	//doesUserEverExists
-
-	if(false) {
-		response.error = 'Not found';
-	} else {
-
-
-    const claims = await models.ClaimBasic.findAll({attributes: ['id', 'plan_name']});
-		response.claimID = claims
-	 }
-
- 	 res.json(response);
-	})
-);
+  const response = {};
+  // You can use DB checking here
+  //doesUserEverExists
+  try {
+    var claims = await models.ClaimBasic.findAll({attributes: ['id', 'plan_name']});
+    
+    response.claims = claims
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
+  res.json(response);
+}));
 
 
 router.get('/claimByID', awaitErorrHandlerFactory(async (req, res, next) => {
