@@ -3,6 +3,7 @@
 //https://burkeknowswords.com/introducing-express-react-starter-b6d299206a3a
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+
 var apis = require('./routes/apis');
 
 var createError = require('http-errors');
@@ -29,7 +30,6 @@ app.use(cors())
 
 app.use('/users', usersRouter);
 app.use('/api', apis);
-
 
 
 //app.use(express.static(path.join(__dirname, 'public')));

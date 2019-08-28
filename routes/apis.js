@@ -8,7 +8,7 @@ var router  = express.Router();
 var models  = require('../models');
 
 var claim = require('./claim');
-
+var emailRouter = require('./email');
 
 var {authenticate, authError} = require('../middleware');
 
@@ -119,6 +119,6 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 
 router.use('/claim', claim);
 
-
+router.use('/email',emailRouter);
 
 module.exports = router;
