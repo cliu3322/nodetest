@@ -21,7 +21,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "imap-simple": "^4.3.0",
+    "imap": "^0.8.19",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.0.1",
     "morgan": "~1.9.1",
