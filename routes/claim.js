@@ -47,7 +47,12 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 }));
 
 
+router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log('api reach')
+  console.log(req.body);
 
+  res.json(response);
+}));
 
 
 
@@ -58,7 +63,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   //doesUserEverExists
   try {
     var claims = await models.ClaimBasic.findAll({attributes: ['id', 'plan_name']});
-    
+
     response.claims = claims
   } catch(e) {
     console.log(e)

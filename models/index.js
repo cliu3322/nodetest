@@ -1,6 +1,9 @@
 'use strict';
 //node_modules/.bin/sequelize model:generate --name User --attributes userName:string,password:string,email:string,firstName:string,lastName:string
-//node_modules/.bin/sequelize db:migrate
+//node_modules/.bin/sequelize model:generate --name ClaimInfo --attributes createdBy:INTEGER,accountholdersname:string,bankaccountnumber:string,bankaddress:string,cause:string,contactemail:string,contactfirstname:string,contacthomeaddress:string,contactlastname:string,contactphonenumber:string,gop:BOOLEAN,ibancodesortcode:string,patientage:INTEGER,patientdob:DATE,patientfirstname:string,patientlastname:string,policyemail:string,policyfirstname:string,policygrouppolicy:BOOLEAN,policylastname:string,policylasttype:string,policyvip:BOOLEAN,reimbusementcurrency:string,relationshiptopatient:string,swift:string
+//node_modules/.bin/sequelize model:generate --name ClaimInfoFiles --attributes fileName:string,fileAddress:string,claimInfoId:INTEGER
+//node_modules/.bin/sequelize model:generate --name ClaimInfoVisits --attributes claimInfoId:INTEGER,dateOfAdmissionVisit:DATE,doctorName:STRING,hospitalOrClinicCountry:STRING,hospitalOrclinicEmail:STRING,hospitalOrClinicName:STRING,hospitalOrClinicCountryrl:STRING,MedicalDiagnosis:STRING
+//node_modules/.bin/sequelize db:migrate --env development
 //node_modules/.bin/sequelize db:migrate --env azure
 const fs = require('fs');
 const path = require('path');
