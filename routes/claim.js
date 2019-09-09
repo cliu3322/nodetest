@@ -48,9 +48,30 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log('api reach')
-  console.log(req.body);
+  const response = {};
+  try {
+    const input = await models.ClaimInfo.create(req.body.data);
+    response.claimID = input.dataValues.id;
 
+
+    var claimInfoId = input.dataValues.id
+
+
+    req.body.visitsdata.forEach(async function(visit) {
+      const { id, hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
+      MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName} = visit;
+      console.log(hospitalOrClinicName)
+      const visitRecord = await models.ClaimInfoVisits.create({hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
+      MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName, claimInfoId})
+    });
+
+
+
+
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
   res.json(response);
 }));
 
