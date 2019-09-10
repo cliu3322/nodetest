@@ -1,7 +1,13 @@
 var express = require('express');
 var router = express.Router();
 var models  = require('../models');
+//here we have three choise: express-fileupload, formidable(more popular) and multer(older)
+//https://malcoded.com/posts/react-file-upload/
+//const fileUpload = require('express-fileupload')
+//https://flaviocopes.com/express-forms-files/
+const formidable = require('formidable')
 
+//router.use(fileUpload());
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
 
@@ -46,27 +52,55 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
+router.post('/test', (req, res, next) => {
+  console.log('test')
+  var form = new formidable.IncomingForm();
+  form.parse(req);
+  form.on('file', function (name, file){
+    console.log(1)
+    console.log('Uploaded ' + file.name);
+  });
+  form.on('field', function(name, value) {
+    console.log(name)
+  });
+})
+
 
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
-    const input = await models.ClaimInfo.create(req.body.data);
-    response.claimID = input.dataValues.id;
-
-
-    var claimInfoId = input.dataValues.id
-
-
-    req.body.visitsdata.forEach(async function(visit) {
-      const { id, hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
-      MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName} = visit;
-      console.log(hospitalOrClinicName)
-      const visitRecord = await models.ClaimInfoVisits.create({hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
-      MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName, claimInfoId})
-    });
-
-
-
+    console.log('files',req.files)
+    console.log('File',req.File)
+    console.log('file',req.file)
+    console.log('data',req.data)
+    console.log('body',req.body)
+    console.log('visitsdata',req.visitsdata)
+    // //insert main table
+    // const input = await models.ClaimInfo.create(req.body.data);
+    // response.claimID = input.dataValues.id;
+    //
+    //
+    // var claimInfoId = input.dataValues.id
+    //
+    // //instert visits
+    // req.body.visitsdata.forEach(async function(visit) {
+    //   const { id, hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
+    //   MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName} = visit;
+    //   console.log(hospitalOrClinicName)
+    //   const visitRecord = await models.ClaimInfoVisits.create({hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
+    //   MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName, claimInfoId})
+    // });
+    //
+    // //insert files
+    // console.log('body',req.files)
+    // req.body.formData.forEach(async function(file) {
+    //   console.log('file',)
+    //   file.mv(`./a`, function(err) {
+    //     if (err) {
+    //       console.log(err)
+    //     }
+    //   })
+    // })
 
   } catch(e) {
     console.log(e)
