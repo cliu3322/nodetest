@@ -53,11 +53,11 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 }));
 
 router.post('/test', (req, res, next) => {
-  console.log('test')
+  //https://github.com/node-formidable/node-formidable/issues/260
   var form = new formidable.IncomingForm();
   form.parse(req);
+  form.uploadDir = "./upload";
   form.on('file', function (name, file){
-    console.log(1)
     console.log('Uploaded ' + file.name);
   });
   form.on('field', function(name, value) {
