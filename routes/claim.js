@@ -57,11 +57,15 @@ router.post('/test', (req, res, next) => {
   var form = new formidable.IncomingForm();
   form.parse(req);
   form.uploadDir = "./upload";
+  form.keepExtensions = true;
   form.on('file', function (name, file){
-    console.log('Uploaded ' + file.name);
+    //console.log(file.name)
   });
   form.on('field', function(name, value) {
-    console.log(name)
+
+  });
+  form.on('fileBegin', function(name, file) {
+
   });
 })
 
@@ -69,19 +73,14 @@ router.post('/test', (req, res, next) => {
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
-    console.log('files',req.files)
-    console.log('File',req.File)
-    console.log('file',req.file)
-    console.log('data',req.data)
     console.log('body',req.body)
-    console.log('visitsdata',req.visitsdata)
-    // //insert main table
-    // const input = await models.ClaimInfo.create(req.body.data);
-    // response.claimID = input.dataValues.id;
-    //
-    //
-    // var claimInfoId = input.dataValues.id
-    //
+    //insert main table
+    const input = await models.ClaimInfo.create(req.body);
+    response.claimID = input.dataValues.id;
+
+
+    //var claimInfoId = input.dataValues.id
+
     // //instert visits
     // req.body.visitsdata.forEach(async function(visit) {
     //   const { id, hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
