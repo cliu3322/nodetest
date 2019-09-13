@@ -8,8 +8,12 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      visitId: {
+        type: Sequelize.INTEGER
+      },
       claimInfoId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: 'ClaimInfos',
           key: 'id'

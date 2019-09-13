@@ -1,4 +1,7 @@
 {
+  "_comment":  "https://www.guru99.com/sql-server-create-user.html",
+  "_comment_TCP":  "https://www.guru99.com/sql-server-create-user.html and restart your system",
+  "_comment1":  "https://www.dundas.com/support/learning/documentation/installation/how-to-enable-sql-server-authentication",
   "development": {
     "username": "test",
     "password": "test",

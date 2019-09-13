@@ -6,6 +6,10 @@ var models  = require('../models');
 //const fileUpload = require('express-fileupload')
 //https://flaviocopes.com/express-forms-files/
 const formidable = require('formidable')
+const util = require('util');
+//https://stackoverflow.com/questions/30128701/parse-form-value-with-formidable-to-filename
+var fs = require('fs');
+var path = require('path');
 
 //router.use(fileUpload());
 //middleware to hanlde errors
@@ -52,28 +56,67 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-router.post('/test', (req, res, next) => {
+router.post('/insertClaimInfoVisits', (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
   var form = new formidable.IncomingForm();
-  form.parse(req);
-  form.uploadDir = "./upload";
+  form.uploadDir = "../upload";
   form.keepExtensions = true;
+  form.multiples = true;
+  form.parse(req);
+
+  var files = []
+  var visit = {}
   form.on('file', function (name, file){
     //console.log(file.name)
+    files.push(file)
   });
+  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
   form.on('field', function(name, value) {
-
+    console.log(value)
+    visit[name]= value;
   });
   form.on('fileBegin', function(name, file) {
 
   });
+
+  form.on('end',async function() {
+    try {
+      //insert visitdata
+      var visitdata = JSON.parse(visit.visitdata)
+      visitdata.claimInfoId= visit.claimID
+
+
+      const visitRecord = await models.ClaimInfoVisits.create(visitdata)
+
+      //upload files
+      for (var i = 0; i < files.length; i++) {
+
+        var extension = path.extname(files[i].name).toLowerCase();
+        var newFileName = visit.claimID+'_'+visitdata.visitId+'_'+i+extension
+        fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
+            if (err) next(err);
+        });
+
+        const visitRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, claimInfoId: visit.claimID})
+      }
+
+    }
+    catch(e) {
+      console.log(e)
+      response.error = e;
+    }
+
+    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
+    //     if (err) next(err);
+    // });
+  });
+
 })
 
 
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
-    console.log('body',req.body)
     //insert main table
     const input = await models.ClaimInfo.create(req.body);
     response.claimID = input.dataValues.id;
@@ -81,15 +124,7 @@ router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) 
 
     //var claimInfoId = input.dataValues.id
 
-    // //instert visits
-    // req.body.visitsdata.forEach(async function(visit) {
-    //   const { id, hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
-    //   MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName} = visit;
-    //   console.log(hospitalOrClinicName)
-    //   const visitRecord = await models.ClaimInfoVisits.create({hospitalOrClinicName, hospitalOrClinicCountryrl, hospitalOrclinicEmail,
-    //   MedicalDiagnosis, dateOfAdmissionVisit, hospitalOrClinicCountry, doctorName, claimInfoId})
-    // });
-    //
+
     // //insert files
     // console.log('body',req.files)
     // req.body.formData.forEach(async function(file) {

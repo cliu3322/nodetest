@@ -91,21 +91,17 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
     	response.error = 'User name not available! Please change another one.';
     } else {
       var hash = bcrypt.hashSync(password, 8);
-      try {
-         const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
-      } catch(e) {
-        console.log(e)
-        response.error = e;
-      }
+        const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
 
-      response.token = jsonwebtoken.sign(
-    		{
-    			expiredAt: new Date().getTime() + expiredAfter,
-    			username: userinput.dataValues.id,
-    			id: 1,
-    		},
-    		secretKey
-    	);
+
+        response.token = jsonwebtoken.sign(
+        	{
+        		expiredAt: new Date().getTime() + expiredAfter,
+        		username: userinput.dataValues.id,
+        		id: 1,
+        	},
+        	secretKey
+        );
 
      }
    } catch(e) {
