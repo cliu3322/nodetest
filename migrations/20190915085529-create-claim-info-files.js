@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       claimInfoId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         references: {
           model: 'ClaimInfos',
           key: 'id'

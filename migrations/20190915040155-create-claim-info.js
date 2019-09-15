@@ -4,84 +4,88 @@ module.exports = {
     return queryInterface.createTable('ClaimInfos', {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        autoIncrement: false,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       createdBy: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
           key: 'id'
         }
       },
-      accountholdersname: {
+      accountHoldersName: {
         type: Sequelize.STRING
       },
-      bankaccountnumber: {
+      bankAccountNumber: {
         type: Sequelize.STRING
       },
-      bankaddress: {
+      bankAddress: {
         type: Sequelize.STRING
       },
       cause: {
         type: Sequelize.STRING
       },
-      contactemail: {
+      contactEmail: {
         type: Sequelize.STRING
       },
-      contactfirstname: {
+      contactFirstName: {
         type: Sequelize.STRING
       },
-      contacthomeaddress: {
+      contactHomeAddress: {
         type: Sequelize.STRING
       },
-      contactlastname: {
+      contactLastName: {
         type: Sequelize.STRING
       },
-      contactphonenumber: {
+      contactPhoneNumber: {
         type: Sequelize.STRING
       },
       gop: {
         type: Sequelize.BOOLEAN
       },
-      ibancodesortcode: {
+      ibanCodeSortCode: {
         type: Sequelize.STRING
       },
-      patientage: {
+      patientAge: {
         type: Sequelize.INTEGER
       },
-      patientdob: {
+      patientDob: {
         type: Sequelize.DATE
       },
-      patientfirstname: {
+      patientFirstName: {
         type: Sequelize.STRING
       },
-      patientlastname: {
+      patientLastName: {
         type: Sequelize.STRING
       },
-      policyemail: {
+      policyEmail: {
         type: Sequelize.STRING
       },
-      policyfirstname: {
+      policyFirstName: {
         type: Sequelize.STRING
       },
-      policygrouppolicy: {
+      policyGroupPolicy: {
         type: Sequelize.BOOLEAN
       },
-      policylastname: {
+      policyLastName: {
         type: Sequelize.STRING
       },
-      policylasttype: {
+      policyLastType: {
         type: Sequelize.STRING
       },
-      policyvip: {
+      policyNumber: {
+        type: Sequelize.STRING
+      },
+      policyVip: {
         type: Sequelize.BOOLEAN
       },
-      reimbusementcurrency: {
+      reimbusementCurrency: {
         type: Sequelize.STRING
       },
-      relationshiptopatient: {
+      relationshipToPatient: {
         type: Sequelize.STRING
       },
       swift: {

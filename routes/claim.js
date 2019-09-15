@@ -43,6 +43,10 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
   try {
+    const policyCount = await models.ClaimBasic.count({})
+    console.log('policyCount',policyCount)
+
+
     const input = await models.ClaimBasic.create({ plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
     cause_of_hospitalisation_visit, hospital_name_address, location, doctor_name,
     billing_currency, reimbursement_currency, email, phone, home_address, bank_account_number,
@@ -117,24 +121,13 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
+    console.log('policyNumber', req.body.policyNumber)
+    const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
+    console.log('policyCount',policyCount)
+    req.body.id = req.body.policyNumber+"_"+(policyCount+1)
     //insert main table
     const input = await models.ClaimInfo.create(req.body);
     response.claimID = input.dataValues.id;
-
-
-    //var claimInfoId = input.dataValues.id
-
-
-    // //insert files
-    // console.log('body',req.files)
-    // req.body.formData.forEach(async function(file) {
-    //   console.log('file',)
-    //   file.mv(`./a`, function(err) {
-    //     if (err) {
-    //       console.log(err)
-    //     }
-    //   })
-    // })
 
   } catch(e) {
     console.log(e)
