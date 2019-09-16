@@ -96,7 +96,7 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
       for (var i = 0; i < files.length; i++) {
 
         var extension = path.extname(files[i].name).toLowerCase();
-        var newFileName = visit.claimID+'_'+visitdata.visitId+'_'+i+extension
+        var newFileName = visit.claimID.replace(/\//g,'_')+'-'+visitdata.visitId+'-'+i+extension
         fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
             if (err) next(err);
         });
@@ -124,7 +124,7 @@ router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) 
     console.log('policyNumber', req.body.policyNumber)
     const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
     console.log('policyCount',policyCount)
-    req.body.id = req.body.policyNumber+"_"+(policyCount+1)
+    req.body.id = req.body.policyNumber+"-"+(policyCount+1)
     //insert main table
     const input = await models.ClaimInfo.create(req.body);
     response.claimID = input.dataValues.id;
