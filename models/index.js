@@ -5,8 +5,14 @@
 // node_modules/.bin/sequelize model:generate --name ClaimInfoVisits --attributes claimInfoId:STRING,dateOfAdmissionVisit:DATE,doctorName:STRING,hospitalOrClinicCountry:STRING,hospitalOrclinicEmail:STRING,hospitalOrClinicName:STRING,hospitalOrClinicCountryrl:STRING,MedicalDiagnosis:STRING
 //node_modules/.bin/sequelize model:generate --name BenefitCategories --attributes name:string
 //node_modules/.bin/sequelize model:generate --name BenefitSubCategories --attributes categoryId:INTEGER,name:string
+
+//node_modules/.bin/sequelize model:generate --name ExchangeRate --attributes code:STRING,name:STRING,perUSD:FLOAT,USDper:FLOAT,date:DATE
+
 //node_modules/.bin/sequelize db:migrate --env development
 //node_modules/.bin/sequelize db:migrate --env azure
+
+
+
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');

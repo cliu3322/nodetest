@@ -11,11 +11,12 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var schedule = require('node-schedule');
 
 
 var cors = require('cors')
 var {authenticate, authError} = require('./middleware');
-
+var {countryList} = require('./currencyRate');
 var app = express();
 
 // view engine setup
@@ -61,4 +62,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+
+//countryList();
+//https://crontab.guru/#0_0_*_*_*
+var j = schedule.scheduleJob('0 0 * * *', function(){
+  countryList()
+});
 module.exports = app;
