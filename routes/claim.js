@@ -71,14 +71,16 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
   var files = []
   var visit = {}
   form.on('file', function (name, file){
-    //console.log(file.name)
+
+
     files.push(file)
   });
   //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
   form.on('field', function(name, value) {
-    console.log(value)
+
     visit[name]= value;
   });
+
   form.on('fileBegin', function(name, file) {
 
   });
@@ -88,26 +90,27 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
       //insert visitdata
       var visitdata = JSON.parse(visit.visitdata)
       visitdata.claimInfoId= visit.claimID
-
-
-      const visitRecord = await models.ClaimInfoVisits.create(visitdata)
+      let visitRecord = await models.ClaimInfoVisits.create(visitdata)
+      console.log(visitRecord.id)
 
       //upload files
       for (var i = 0; i < files.length; i++) {
-
+        //console.log(files[i].name)
         var extension = path.extname(files[i].name).toLowerCase();
         var newFileName = visit.claimID.replace(/\//g,'_')+'-'+visitdata.visitId+'-'+i+extension
         fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
             if (err) next(err);
         });
 
-        const visitRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, claimInfoId: visit.claimID})
+        const fileRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
       }
+
+      res.send({id:visitRecord.id});
 
     }
     catch(e) {
       console.log(e)
-      response.error = e;
+      res.sendStatus(500)
     }
 
     // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
@@ -132,10 +135,81 @@ router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) 
   } catch(e) {
     console.log(e)
     response.error = e;
+    res.sendStatus(500)
   }
+  console.log(response)
   res.json(response);
 }));
 
+router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../uploadbilling";
+  form.keepExtensions = true;
+  form.multiples = true;
+  form.parse(req);
+
+  var files = []
+  var fields = {}
+  form.on('file', function (name, file){
+    files.push(file)
+  });
+  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
+  form.on('field', function(name, value) {
+    fields[name]= value;
+  });
+
+  form.on('fileBegin', function(name, file) {
+
+  });
+
+  form.on('end',async function() {
+    try {
+
+
+      //upload files
+      for (var i = 0; i < files.length; i++) {
+        var extension = path.extname(files[i].name).toLowerCase();
+        var newFileName = fields.visitId.replace(/\//g,'_')+'-'+i+extension
+        fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
+            if (err) next(err);
+        });
+
+        const fileRecord = await models.BillingInfoFiles.create(
+          {fileName:newFileName, fileAddress: form.uploadDir, visitId: fields.visitId}
+        )
+
+      }
+
+      //upload currency info
+      await models.ClaimInfoVisits.findByPk(fields.visitId).then((visit) => {
+        return visit.update(JSON.parse(fields.currency));
+      })
+
+      //insert billingInfo
+      var billingInfo = JSON.parse(fields.billingInfo)
+
+      for (var i = 0; i < billingInfo.length; i++) {
+        console.log('fields.visitId',fields.visitId)
+        billingInfo[i].visitId=fields.visitId
+        await models.BillingInfo.create(billingInfo[i]);
+
+      }
+
+      res.sendStatus(200)
+
+    }
+    catch(e) {
+      console.log(e)
+      res.sendStatus(500)
+    }
+
+    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
+    //     if (err) next(err);
+    // });
+  });
+
+}));
 
 
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {

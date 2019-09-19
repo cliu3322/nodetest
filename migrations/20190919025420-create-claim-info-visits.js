@@ -15,6 +15,9 @@ module.exports = {
           key: 'id'
         }
       },
+      visitNumber: {
+        type: Sequelize.INTEGER
+      },
       dateOfAdmissionVisit: {
         type: Sequelize.DATE
       },
@@ -35,6 +38,15 @@ module.exports = {
       },
       MedicalDiagnosis: {
         type: Sequelize.STRING
+      },
+      billingCurrency: {
+        type: Sequelize.STRING
+      },
+      usdper: {
+        type: Sequelize.FLOAT
+      },
+      currencyDate: {
+        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,

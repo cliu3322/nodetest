@@ -9,6 +9,7 @@ var models  = require('../models');
 
 var claim = require('./claim');
 var emailRouter = require('./email');
+var constant = require('./constant');
 
 var {authenticate, authError} = require('../middleware');
 
@@ -50,8 +51,8 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const response = {};
 	// You can use DB checking here
   try {
-	   const user = await models.User.findOne({ where: {userName: username} });
-
+	  const user = await models.User.findOne({ where: {userName: username} });
+    console.log(user)
 
   	if (user === null) {
   		response.error = 'Not found';
@@ -114,6 +115,7 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
 router.use('/claim', claim);
+router.use('/constant', constant);
 
 router.use('/email',emailRouter);
 

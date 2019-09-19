@@ -1,6 +1,8 @@
 //https://blogs.msdn.microsoft.com/reactjsnodejsazure/2017/08/01/reactjs-nodejs-express-azure-web-app/   combine client with server
 //https://medium.com/@chrisjr06/creating-mern-stack-app-and-hosting-in-microsoft-azure-using-create-react-app-w-continuous-4acef0c87e71 as above
 //https://burkeknowswords.com/introducing-express-react-starter-b6d299206a3a
+
+//https://flaviocopes.com/express-send-response/
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 

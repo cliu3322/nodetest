@@ -8,18 +8,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      visitId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'ClaimInfoVisits',
+          key: 'id'
+        }
+      },
       fileName: {
         type: Sequelize.STRING
       },
       fileAddress: {
         type: Sequelize.STRING
-      },
-      claimInfoId: {
-        type: Sequelize.STRING,
-        references: {
-          model: 'ClaimInfos',
-          key: 'id'
-        }
       },
       createdAt: {
         allowNull: false,
