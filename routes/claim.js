@@ -113,6 +113,8 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
       res.sendStatus(500)
     }
 
+
+      const fileRecord = await models.DocumentsFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
     // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
     //     if (err) next(err);
     // });
@@ -121,24 +123,44 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
 })
 
 
-router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
-  const response = {};
-  try {
-    console.log('policyNumber', req.body.policyNumber)
-    const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
-    console.log('policyCount',policyCount)
-    req.body.id = req.body.policyNumber+"-"+(policyCount+1)
-    //insert main table
-    const input = await models.ClaimInfo.create(req.body);
-    response.claimID = input.dataValues.id;
+router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../documents";
+  form.keepExtensions = true;
+  form.multiples = true;
+  form.parse(req);
 
-  } catch(e) {
-    console.log(e)
-    response.error = e;
-    res.sendStatus(500)
-  }
-  console.log(response)
-  res.json(response);
+  var files = []
+  var data = {}
+  form.on('file', function (name, file){
+    files.push(file)
+  });
+  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
+  form.on('field', function(name, value) {
+    data[name]= value;
+  });
+
+  form.on('fileBegin', function(name, file) {
+
+  });
+
+  form.on('end',async function() {
+    try {
+      console.log(files.length)
+      if(files.length > 1)
+        throw new Error('file length is longer than 1');
+      //console.log(files[0])
+      res.send(data);
+    } catch(e) {
+      console.log(e)
+      res.sendStatus(500)
+    }
+
+    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
+    //     if (err) next(err);
+    // });
+  });
+
 }));
 
 router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
@@ -209,6 +231,27 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
     // });
   });
 
+}));
+
+
+router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+  const response = {};
+  try {
+    console.log('policyNumber', req.body.policyNumber)
+    const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
+    console.log('policyCount',policyCount)
+    req.body.id = req.body.policyNumber+"-"+(policyCount+1)
+    //insert main table
+    const input = await models.ClaimInfo.create(req.body);
+    response.claimID = input.dataValues.id;
+
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+    res.sendStatus(500)
+  }
+  console.log(response)
+  res.json(response);
 }));
 
 

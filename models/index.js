@@ -5,7 +5,10 @@
 // node_modules/.bin/sequelize model:generate --name ClaimInfoVisits --attributes claimInfoId:STRING,visitNumber:INTEGER,dateOfAdmissionVisit:DATE,doctorName:STRING,hospitalOrClinicCountry:STRING,hospitalOrclinicEmail:STRING,hospitalOrClinicName:STRING,hospitalOrClinicCountryrl:STRING,MedicalDiagnosis:STRING,billingCurrency:STRING,usdper:FLOAT,currencyDate:DATE
 // node_modules/.bin/sequelize model:generate --name ClaimInfoFiles --attributes visitId:INTEGER,fileName:STRING,fileAddress:STRING
 //node_modules/.bin/sequelize model:generate --name BillingInfoFiles --attributes visitId:INTEGER,fileName:STRING,fileAddress:STRING
+
 //node_modules/.bin/sequelize model:generate --name BillingInfo --attributes visitId:INTEGER,billingCat:INTEGER,billingSubCat:INTEGER,value:FLOAT
+
+//node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes path:STRING,fileName:STRING,notes:STRING,visitId:INTEGER,active:BOOLEAN
 //node_modules/.bin/sequelize model:generate --name BenefitCategories --attributes name:string
 //node_modules/.bin/sequelize model:generate --name BenefitSubCategories --attributes categoryId:INTEGER,name:string
 
