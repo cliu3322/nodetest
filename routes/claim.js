@@ -89,8 +89,8 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
       if(files.length > 1)
         throw new Error('file length is longer than 1');
 
-      const fileRecord = await models.DocumentsFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
-      res.send(data);
+      const fileRecord = await models.DocumentsFiles.create({fileName:files[0].name, path: files[0].path, visiId: data.visitId, active:true})
+      res.send(fileRecord);
     } catch(e) {
       console.log(e)
       res.sendStatus(500)
@@ -103,7 +103,7 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
-router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
   var form = new formidable.IncomingForm();
   form.uploadDir = "../upload/billinginfo";
@@ -144,7 +144,9 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
       }
 
       //upload currency info
+
       await models.ClaimInfoVisits.findByPk(fields.visitId).then((visit) => {
+
         return visit.update(JSON.parse(fields.currency));
       })
 
@@ -171,6 +173,31 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
     // });
   });
 
+}));
+
+router.post('/insertdocument', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  try {
+    console.log(req.body.path)
+
+     models.DocumentsFiles.describe().then(function (schema) {
+        return Object.keys(schema).filter(function(field){
+            return schema[field].primaryKey;
+        });
+    }).tap(console.log);
+
+    // const result = await models.BillingInfoFiles.findByPk(req.body.path).then((BillingInfoFile) => {
+    //   console.log(BillingInfoFile)
+    //   //return BillingInfoFiles.update({notes:req.body.notes});
+    // })
+    // console.log('reuslt',result)
+    res.sendStatus(200)
+
+  }
+  catch(e) {
+    console.log(e)
+    res.sendStatus(500)
+  }
 }));
 
 
