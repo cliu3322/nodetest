@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
     hospitalOrClinicCountryrl: DataTypes.STRING,
     MedicalDiagnosis: DataTypes.STRING,
     billingCurrency: DataTypes.STRING,
-    usdper: DataTypes.FLOAT,
+    billingUsdper: DataTypes.FLOAT,
+    reimbusementUsdper: DataTypes.FLOAT,
     currencyDate: DataTypes.DATE
   }, {});
   ClaimInfoVisits.associate = function(models) {

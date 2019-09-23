@@ -42,7 +42,10 @@ module.exports = {
       billingCurrency: {
         type: Sequelize.STRING
       },
-      usdper: {
+      billingUsdper: {
+        type: Sequelize.FLOAT
+      },
+      reimbusementUsdper: {
         type: Sequelize.FLOAT
       },
       currencyDate: {

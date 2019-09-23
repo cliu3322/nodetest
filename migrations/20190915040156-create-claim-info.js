@@ -40,6 +40,9 @@ module.exports = {
       contactLastName: {
         type: Sequelize.STRING
       },
+      contactPhoneNumberCountryCode: {
+        type: Sequelize.STRING
+      },
       contactPhoneNumber: {
         type: Sequelize.STRING
       },
@@ -73,7 +76,7 @@ module.exports = {
       policyLastName: {
         type: Sequelize.STRING
       },
-      policyLastType: {
+      policyType: {
         type: Sequelize.STRING
       },
       policyNumber: {

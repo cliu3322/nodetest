@@ -44,7 +44,6 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   try {
     const policyCount = await models.ClaimBasic.count({})
-    console.log('policyCount',policyCount)
 
 
     const input = await models.ClaimBasic.create({ plan_name, member_policy_name, mode_of_treatment, date_of_hospitalisation_visit,
@@ -60,72 +59,12 @@ router.post('/insertClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-router.post('/insertClaimInfoVisits', (req, res, next) => {
-  //https://github.com/node-formidable/node-formidable/issues/260
-  var form = new formidable.IncomingForm();
-  form.uploadDir = "../upload";
-  form.keepExtensions = true;
-  form.multiples = true;
-  form.parse(req);
 
-  var files = []
-  var visit = {}
-  form.on('file', function (name, file){
-
-
-    files.push(file)
-  });
-  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
-  form.on('field', function(name, value) {
-
-    visit[name]= value;
-  });
-
-  form.on('fileBegin', function(name, file) {
-
-  });
-
-  form.on('end',async function() {
-    try {
-      //insert visitdata
-      var visitdata = JSON.parse(visit.visitdata)
-      visitdata.claimInfoId= visit.claimID
-      let visitRecord = await models.ClaimInfoVisits.create(visitdata)
-      console.log(visitRecord.id)
-
-      //upload files
-      for (var i = 0; i < files.length; i++) {
-        //console.log(files[i].name)
-        var extension = path.extname(files[i].name).toLowerCase();
-        var newFileName = visit.claimID.replace(/\//g,'_')+'-'+visitdata.visitId+'-'+i+extension
-        fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
-            if (err) next(err);
-        });
-
-        const fileRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
-      }
-
-      res.send({id:visitRecord.id});
-
-    }
-    catch(e) {
-      console.log(e)
-      res.sendStatus(500)
-    }
-
-
-      const fileRecord = await models.DocumentsFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
-    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
-    //     if (err) next(err);
-    // });
-  });
-
-})
 
 
 router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) => {
   var form = new formidable.IncomingForm();
-  form.uploadDir = "../documents";
+  form.uploadDir = "../upload/documents";
   form.keepExtensions = true;
   form.multiples = true;
   form.parse(req);
@@ -146,10 +85,11 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
   form.on('end',async function() {
     try {
-      console.log(files.length)
+
       if(files.length > 1)
         throw new Error('file length is longer than 1');
-      //console.log(files[0])
+
+      const fileRecord = await models.DocumentsFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visiId: visitRecord.id})
       res.send(data);
     } catch(e) {
       console.log(e)
@@ -166,7 +106,7 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
   var form = new formidable.IncomingForm();
-  form.uploadDir = "../uploadbilling";
+  form.uploadDir = "../upload/billinginfo";
   form.keepExtensions = true;
   form.multiples = true;
   form.parse(req);
@@ -212,7 +152,7 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
       var billingInfo = JSON.parse(fields.billingInfo)
 
       for (var i = 0; i < billingInfo.length; i++) {
-        console.log('fields.visitId',fields.visitId)
+
         billingInfo[i].visitId=fields.visitId
         await models.BillingInfo.create(billingInfo[i]);
 
@@ -237,12 +177,13 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
 router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
-    console.log('policyNumber', req.body.policyNumber)
+
     const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
-    console.log('policyCount',policyCount)
+
     req.body.id = req.body.policyNumber+"-"+(policyCount+1)
     //insert main table
     const input = await models.ClaimInfo.create(req.body);
+
     response.claimID = input.dataValues.id;
 
   } catch(e) {
@@ -250,9 +191,68 @@ router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) 
     response.error = e;
     res.sendStatus(500)
   }
-  console.log(response)
+
   res.json(response);
 }));
+
+router.post('/insertClaimInfoVisits', (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../upload/claiminfo";
+  form.keepExtensions = true;
+  form.multiples = true;
+  form.parse(req);
+
+  var files = []
+  var visit = {}
+  form.on('file', function (name, file){
+    files.push(file)
+  });
+  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
+  form.on('field', function(name, value) {
+    visit[name]= value;
+  });
+
+  form.on('fileBegin', function(name, file) {
+
+  });
+
+  form.on('end',async function() {
+    try {
+      //insert visitdata
+      var visitdata = JSON.parse(visit.visitdata)
+      visitdata.claimInfoId= visit.claimID
+      let visitRecord = await models.ClaimInfoVisits.create(visitdata)
+
+      //upload files
+      for (var i = 0; i < files.length; i++) {
+
+        var extension = path.extname(files[i].name).toLowerCase();
+        var newFileName = visit.claimID.replace(/\//g,'_')+'-'+visitdata.visitNumber+'-'+i+extension
+        fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
+            if (err) next(err);
+        });
+        console.log(visitRecord.dataValues.id)
+        const fileRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visitId: visitRecord.dataValues.id})
+      }
+
+      res.send({id:visitRecord.id});
+
+    }
+    catch(e) {
+      console.log(e)
+      res.sendStatus(500)
+    }
+
+
+
+    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
+    //     if (err) next(err);
+    // });
+  });
+
+})
+
 
 
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
