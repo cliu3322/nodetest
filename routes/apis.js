@@ -57,11 +57,12 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
   	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
       response.error = 'password and username do not match';
     } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
+      console.log(user)
       response.token = jsonwebtoken.sign(
         {
           expiredAt: new Date().getTime() + expiredAfter,
           username,
-          id: 1,
+          id: user.dataValues.id
         },
         secretKey
       );
@@ -96,8 +97,8 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
         response.token = jsonwebtoken.sign(
         	{
         		expiredAt: new Date().getTime() + expiredAfter,
-        		username: userinput.dataValues.id,
-        		id: 1,
+        		username: userinput.dataValues.userName,
+        		id: userinput.dataValues.id,
         	},
         	secretKey
         );
