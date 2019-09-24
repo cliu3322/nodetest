@@ -8,7 +8,8 @@ var router  = express.Router();
 var models  = require('../models');
 
 var claim = require('./claim');
-
+var emailRouter = require('./email');
+var constant = require('./constant');
 
 var {authenticate, authError} = require('../middleware');
 
@@ -49,25 +50,29 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const { username, password } = req.body;
 	const response = {};
 	// You can use DB checking here
-	const user = await models.User.findOne({ where: {userName: username} });
-
-	if (user === null) {
-		response.error = 'Not found';
-	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
-    response.error = 'password and username do not match';
-  } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
-    response.token = jsonwebtoken.sign(
-      {
-        expiredAt: new Date().getTime() + expiredAfter,
-        username,
-        id: 1,
-      },
-      secretKey
-    );
+  try {
+	  const user = await models.User.findOne({ where: {userName: username} });
+  	if (user === null) {
+  		response.error = 'Not found';
+  	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
+      response.error = 'password and username do not match';
+    } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
+      response.token = jsonwebtoken.sign(
+        {
+          expiredAt: new Date().getTime() + expiredAfter,
+          username,
+          id: 1,
+        },
+        secretKey
+      );
+    }
+     else {
+  		response.error = 'Some server error';
+  	}
+  } catch(e) {
+    console.log(e)
+    response.error = e;
   }
-   else {
-		response.error = 'Some server error';
-	}
 	res.json(response);
 }));
 
@@ -77,30 +82,39 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	const response = {};
 	// You can use DB checking here
 	//doesUserEverExists
+  try {
+	  const user = await models.User.findOne({ where: {userName: username} });
 
-  const user = await models.User.findOne({ where: {userName: username} });
-	if(user !== null) {
-		response.error = 'User name not available! Please change another one.';
-	} else {
-    var hash = bcrypt.hashSync(password, 8);
-    const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
-    response.token = jsonwebtoken.sign(
-			{
-				expiredAt: new Date().getTime() + expiredAfter,
-				username: userinput.dataValues.id,
-				id: 1,
-			},
-			secretKey
-		);
 
-	 }
- 		res.json(response);
+    if(user !== null) {
+    	response.error = 'User name not available! Please change another one.';
+    } else {
+      var hash = bcrypt.hashSync(password, 8);
+        const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
+
+
+        response.token = jsonwebtoken.sign(
+        	{
+        		expiredAt: new Date().getTime() + expiredAfter,
+        		username: userinput.dataValues.id,
+        		id: 1,
+        	},
+        	secretKey
+        );
+
+     }
+   } catch(e) {
+     console.log(e)
+     response.error = e;
+   }
+   res.json(response);
 	})
 );
 
 
 router.use('/claim', claim);
+router.use('/constant', constant);
 
-
+router.use('/email',emailRouter);
 
 module.exports = router;
