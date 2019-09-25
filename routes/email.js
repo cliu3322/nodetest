@@ -39,28 +39,65 @@ router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
 }))
 
 
+router.post('/sendhtml', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  var result = await sendhtml(req.body.html).catch(console.error);
+  res.send(result)
+}))
+
+
+async function sendhtml(html) {
+    MailConfig.ViewOption(gmailTransport,hbs);
+    console.log(html)
+    try {
+      var info = await gmailTransport.sendMail({
+        from: 'liuchunyi1987@hotmail.com', // sender address
+        to: 'eric.sqlserver@gmail.com, cwhite@welcometoalliance.com', // list of receivers
+        subject: 'Hello ✔', // Subject line
+        html: html,
+        context: {
+          name:"tariqul_islam",
+          email: "tariqul.islam.rony@gmail.com",
+          address: "52, Kadamtola Shubag dhaka"
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      });
+
+      await gmailTransport.sendMail({
+        from: 'liuchunyi1987@hotmail.com', // sender address
+        to: 'eric.sqlserver@gmail.com, cwhite@welcometoalliance.com', // list of receivers
+        subject: 'Hello ✔', // Subject line
+        template: 'test',
+        context: {
+          name: html,
+          email: "tariqul.islam.rony@gmail.com",
+          address: "52, Kadamtola Shubag dhaka"
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      });
+
+
+      // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+      return info
+    }
+    catch (e) {
+      console.log(e);
+    }
+}
+
+
 async function main() {
   console.log('triggered')
-
-
-
-
     MailConfig.ViewOption(gmailTransport,hbs);
 
-  //  var file = fs.readFileSync(__dirname +'/mailTemplate/template.html', "utf8");
-
-    // let HelperOptions = {
-    //   from: '"Tariqul islam" <tariqul.islam.rony@gmail.com>',
-    //   to: 'tariqul@itconquest.com',
-    //   subject: 'Hellow world!',
-    //   template: 'test',
-    //   context: {
-    //     name:"tariqul_islam",
-    //     email: "tariqul.islam.rony@gmail.com",
-    //     address: "52, Kadamtola Shubag dhaka"
-    //   }
-    // };
-    //
 
     try {
       var info = await gmailTransport.sendMail({
@@ -90,27 +127,4 @@ async function main() {
     }
 }
 
-
-  // MailConfig.ViewOption(gmailTransport,hbs);
-  // let HelperOptions = {
-  //   from: '"Tariqul islam" <tariqul.islam.rony@gmail.com>',
-  //   to: 'tariqul@itconquest.com',
-  //   subject: 'Hellow world!',
-  //   template: 'test',
-  //   context: {
-  //     name:"tariqul_islam",
-  //     email: "tariqul.islam.rony@gmail.com",
-  //     address: "52, Kadamtola Shubag dhaka"
-  //   }
-  // };
-  //
-  // gmailTransport.sendMail(HelperOptions, (error,info) => {
-  //   if(error) {
-  //     console.log(error);
-  //     res.json(error);
-  //   }
-  //   console.log("email is send");
-  //   console.log(info);
-  //   res.json(info)
-  // });
 module.exports = router
