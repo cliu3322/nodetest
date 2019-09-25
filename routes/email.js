@@ -67,7 +67,7 @@ async function main() {
         from: 'liuchunyi1987@hotmail.com', // sender address
         to: 'eric.sqlserver@gmail.com, cliu3322@hawaii.edu', // list of receivers
         subject: 'Hello ✔', // Subject line
-        template: 'test00',
+        template: 'threecolumns',
         context: {
           name:"tariqul_islam",
           email: "tariqul.islam.rony@gmail.com",
