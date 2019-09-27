@@ -20,6 +20,8 @@ var cors = require('cors')
 var {authenticate, authError} = require('./middleware');
 var {countryList} = require('./currencyRate');
 var app = express();
+var fs = require('fs');
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -70,4 +72,22 @@ app.use(function(err, req, res, next) {
 var j = schedule.scheduleJob('0 0 * * *', function(){
   countryList()
 });
+
+if (!fs.existsSync('../upload')){
+    fs.mkdirSync('../upload');
+}
+
+
+if (!fs.existsSync('../upload/claiminfo')){
+    fs.mkdirSync('../upload/claiminfo');
+}
+
+if (!fs.existsSync('../upload/billinginfo')){
+    fs.mkdirSync('../upload/billinginfo');
+}
+
+if (!fs.existsSync('../upload/documents')){
+    fs.mkdirSync('../upload/documents');
+}
+
 module.exports = app;
