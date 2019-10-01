@@ -10,7 +10,8 @@ const util = require('util');
 //https://stackoverflow.com/questions/30128701/parse-form-value-with-formidable-to-filename
 var fs = require('fs');
 var path = require('path');
-
+var d3 = require('d3-array');
+const sequelize = require('sequelize');
 //router.use(fileUpload());
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
@@ -162,7 +163,7 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
       var billingInfo = JSON.parse(fields.billingInfo)
 
       for (var i = 0; i < billingInfo.length; i++) {
-
+        console.log(fields)
         billingInfo[i].visitId=fields.visitId
         await models.BillingInfo.create(billingInfo[i]);
 
@@ -249,13 +250,86 @@ router.post('/insertdocumentsnotes', awaitErorrHandlerFactory(async (req, res, n
 
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
-  const response = {};
+  var response = {};
   // You can use DB checking here
   //doesUserEverExists
   try {
-    var claims = await models.ClaimBasic.findAll({attributes: ['id', 'plan_name']});
+   //var claims = await models.BillingInfo.findAll({ include: [ models.ClaimInfoVisits ] });
 
-    response.claims = claims
+    // var claims = await models.BillingInfo.findAll({
+    //   attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
+    //   include: [{
+    //     model: models.ClaimInfoVisits,
+    //     attributes:[],
+    //     include: [{
+    //       model: models.ClaimInfo
+    //     }],
+    //   }],
+    //   group : ['ClaimInfoVisit->ClaimInfo.id'],
+    //   raw: true
+    // });
+
+
+
+      // var claims = await models.ClaimInfo.findAll({
+      //   attributes: ['id'],
+      //   include: [{
+      //     model:models.ClaimInfoVisits,
+      //     attributes: [],
+      //     include: [{
+      //       model: models.BillingInfo,
+      //       attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
+      //     }],
+      //   }],
+      //   group : ['claiminfo.id', 'ClaimInfoVisits->BillingInfos.id'],
+      //   raw: true
+      // });
+
+
+      // var claims = await models.sequelize.query(`
+      // SELECT [ClaimInfo].[id],[ClaimInfo].[createdBy],
+      //        Sum([value])                         AS
+      //        [ClaimInfoVisits.BillingInfos.total]
+      // FROM   [claiminfos] AS [ClaimInfo]
+      //        LEFT OUTER JOIN [claiminfovisits] AS [ClaimInfoVisits]
+      //                     ON [ClaimInfo].[id] = [claiminfovisits].[claiminfoid]
+      //        LEFT OUTER JOIN [billinginfos] AS [ClaimInfoVisits->BillingInfos]
+      //                     ON [claiminfovisits].[id] =
+      //                        [ClaimInfoVisits->BillingInfos].[visitid]
+      // GROUP  BY [claiminfo].[id], [ClaimInfo].[createdBy
+      // `, { type: sequelize.QueryTypes.SELECT})
+
+
+
+      var claims = await models.ClaimInfo.findAll({
+        include: [{
+          model:models.ClaimInfoVisits,
+          attributes: ['id'],
+          include: [{
+            attributes: ['value'],
+            model: models.BillingInfo,
+            // attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
+          }],
+        }],
+        raw: false
+      });
+
+
+      // var newClaims = claims.claims.map( claimInfo => {
+      //   console.log(claimInfo)
+      //   claimInfo.total = d3.sum(claimInfo.ClaimInfoVisits, vis => d3.sum(vis.BillingInfos, billing => billing.value))
+      //   return claimInfo
+      // });
+
+      // var claims = await models.ClaimInfo.findAll({
+      //   include: [{
+      //     model:models.ClaimInfoVisits
+      //   }]
+      // });
+
+       // var newArray= d3.group(claims, d => d.id)
+
+       response = claims
   } catch(e) {
     console.log(e)
     response.error = e;

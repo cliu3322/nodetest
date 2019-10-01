@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   BillingInfo.associate = function(models) {
     // associations can be defined here
+    BillingInfo.belongsTo(models.ClaimInfoVisits, {
+      foreignKey: 'visitId',  targetKey: 'id'
+    });
   };
   return BillingInfo;
 };

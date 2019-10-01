@@ -17,6 +17,13 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   ClaimInfoVisits.associate = function(models) {
     // associations can be defined here
+    ClaimInfoVisits.hasMany(models.BillingInfo, {
+      foreignKey: 'visitId',  targetKey: 'id'
+    });
+
+    ClaimInfoVisits.belongsTo(models.ClaimInfo, {
+      foreignKey: 'claimInfoId',  targetKey: 'id'
+    });
   };
   return ClaimInfoVisits;
 };
