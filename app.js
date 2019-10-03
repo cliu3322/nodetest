@@ -6,6 +6,7 @@
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+
 var apis = require('./routes/apis');
 
 var createError = require('http-errors');
@@ -35,7 +36,8 @@ app.use(cors())
 
 app.use('/users', usersRouter);
 app.use('/api', apis);
-
+//app.use('/upload', upload);
+app.use('/upload', express.static(path.join(__dirname, '../upload')))
 
 //app.use(express.static(path.join(__dirname, 'public')));
 //app.use('/', indexRouter)

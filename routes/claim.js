@@ -79,22 +79,25 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
     try {
       //insert visitdata
       var visitdata = JSON.parse(visit.visitdata)
-      visitdata.claimInfoId= visit.claimID
+
       let visitRecord = await models.ClaimInfoVisits.create(visitdata)
 
       //upload files
+      var visitFileList = []
       for (var i = 0; i < files.length; i++) {
 
         var extension = path.extname(files[i].name).toLowerCase();
-        var newFileName = visit.claimID.replace(/\//g,'_')+'-'+visitdata.visitNumber+'-'+i+extension
+        var newFileName = visitdata.claimInfoId.replace(/\//g,'_')+'-'+visitdata.visitNumber+'-'+i+extension
         fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
             if (err) next(err);
         });
-        console.log(visitRecord.dataValues.id)
-        const fileRecord = await models.ClaimInfoFiles.create({fileName:newFileName, fileAddress: form.uploadDir, visitId: visitRecord.dataValues.id})
-      }
+          console.log({name:newFileName, url: form.uploadDir, visitId: visitRecord.dataValues.id, active:true})
+        const fileRecord = await models.ClaimInfoVisitsFiles.create({name:newFileName, url: "/upload/claiminfo/" + newFileName, visitId: visitRecord.dataValues.id, active:true}, {raw: true})
 
-      res.send({id:visitRecord.id});
+        visitFileList.push(fileRecord.dataValues)
+      }
+      visitRecord.dataValues.visitFileList =  visitFileList
+      res.send(visitRecord);
 
     }
     catch(e) {
