@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
     cause: DataTypes.STRING,
     createdAt: DataTypes.DATE,
     reimbusementCurrency: DataTypes.STRING,
+    contactEmail: DataTypes.STRING,
+    contactPhoneNumber: DataTypes.STRING,
+    bankAccountNumber: DataTypes.STRING,
+
   }, {});
   RejectedClaimsOldData.associate = function(models) {
   };
