@@ -187,6 +187,35 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
 
 }));
 
+router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  console.log(req.body)
+  res.send('respond with a resource');
+
+}));
+
+router.get('/getBillingInfos', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  var response = {};
+  console.log('get')
+  console.log(req.body)
+  console.log(req.query)
+  console.log(req.params)
+  console.log(req.data)
+  res.json(response);
+}));
+
+
+router.post('/getBillingInfos', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  var response = {};
+  console.log('post')
+  console.log(req.body)
+  console.log(req.query)
+  console.log(req.params)
+  console.log(req.data)
+  res.json(response);
+}));
 
 router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) => {
   var form = new formidable.IncomingForm();

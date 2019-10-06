@@ -10,6 +10,7 @@ var models  = require('../models');
 var claim = require('./claim');
 var emailRouter = require('./email');
 var constant = require('./constant');
+var convertor = require('./convertor');
 
 var {authenticate, authError} = require('../middleware');
 
@@ -116,5 +117,7 @@ router.use('/claim', claim);
 router.use('/constant', constant);
 
 router.use('/email',emailRouter);
+
+router.use('/convertor',convertor)
 
 module.exports = router;

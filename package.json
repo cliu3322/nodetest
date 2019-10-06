@@ -27,6 +27,7 @@
     "formidable": "^1.2.1",
     "html-table-to-json": "^0.4.1",
     "http-errors": "~1.6.3",
+    "humanname": "^0.2.2",
     "imap": "^0.8.19",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.0.1",
