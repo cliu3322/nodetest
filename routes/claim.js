@@ -32,15 +32,25 @@ router.get('/', function(req, res, next) {
 
 
 
-router.post('/insertClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
+    var input
+    if(req.body.claimID === null) {
 
-    const policyCount = await models.ClaimInfo.count({policyNumber:req.body.policyNumber})
+      const policyCount = await models.ClaimInfo.count({policyNumber:req.body.claimData.policyNumber})
 
-    req.body.id = req.body.policyNumber+"-"+(policyCount+1)
-    //insert main table
-    const input = await models.ClaimInfo.create(req.body);
+      req.body.claimData.id = req.body.claimData.policyNumber+"-"+(policyCount+1)
+      //insert main table
+      input= await models.ClaimInfo.create(req.body.claimData);
+    } else {
+
+      input = await models.ClaimInfo.findOne({where:{id:req.body.claimID}}).then(ClaimInfo => {
+
+        return ClaimInfo.update(req.body.claimData)
+      });
+    }
+
 
     response.claimID = input.dataValues.id;
 
@@ -62,13 +72,24 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
   form.parse(req);
 
   var files = []
+  var filesData = []
   var visit = {}
   form.on('file', function (name, file){
     files.push(file)
   });
   //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
   form.on('field', function(name, value) {
-    visit[name]= value;
+
+    switch (name) {
+      case 'visitdata':
+        visit[name]= value;
+        break;
+      case 'files':
+        filesData.push(value)
+        break;
+      default:
+
+    }
   });
 
   form.on('fileBegin', function(name, file) {
@@ -77,13 +98,35 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
 
   form.on('end',async function() {
     try {
+
       //insert visitdata
       var visitdata = JSON.parse(visit.visitdata)
+      var visitRecord
+      var visitFileList = []
 
-      let visitRecord = await models.ClaimInfoVisits.create(visitdata)
+      if (visitdata.id === null ||visitdata.id === undefined ) {
+        visitRecord = await models.ClaimInfoVisits.create(visitdata)
+
+      } else {
+        visitRecord = await models.ClaimInfoVisits.findOne({where:{id:visitdata.id}}).then(ClaimInfoVisit => {
+          delete visitdata['id'];
+          return ClaimInfoVisit.update(visitdata)
+        });
+
+        models.ClaimInfoVisitsFiles.findAll({where:{visitId:visitdata.id}}).then(ClaimInfoVisitsFiles => {
+          ClaimInfoVisitsFiles.destroy()
+        });
+
+        for (var i = 0; i < files.length; i++) {
+          filesData[i].uid
+          models.ClaimInfoVisitsFiles.findOne({ where: { uid: filesData[i].uid }, paranoid: false }).then(ClaimInfoVisitsFiles => {
+            ClaimInfoVisitsFiles.restore()
+          });
+        }
+      }
 
       //upload files
-      var visitFileList = []
+
       for (var i = 0; i < files.length; i++) {
 
         var extension = path.extname(files[i].name).toLowerCase();
@@ -91,12 +134,15 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
         fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
             if (err) next(err);
         });
-          console.log({name:newFileName, url: form.uploadDir, visitId: visitRecord.dataValues.id, active:true})
+
         const fileRecord = await models.ClaimInfoVisitsFiles.create({name:newFileName, url: "/upload/claiminfo/" + newFileName, visitId: visitRecord.dataValues.id, active:true}, {raw: true})
 
         visitFileList.push(fileRecord.dataValues)
       }
       visitRecord.dataValues.visitFileList =  visitFileList
+
+
+
       res.send(visitRecord);
 
     }
@@ -190,7 +236,25 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
 router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
   console.log(req.body)
-  res.send('respond with a resource');
+
+  const billingInfoRecord = await models.BillingInfo.create(req.body)
+
+  res.send(billingInfoRecord);
+
+}));
+
+router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  console.log(req.body)
+
+  const visits = await models.ClaimInfoVisits.findAll({
+    where:{claimInfoId:req.body.claimID},
+    include:{
+      model:models.BillingInfo
+    },
+  })
+  console.log(visits)
+  res.send(visits);
 
 }));
 
@@ -286,51 +350,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   // You can use DB checking here
   //doesUserEverExists
   try {
-   //var claims = await models.BillingInfo.findAll({ include: [ models.ClaimInfoVisits ] });
-
-    // var claims = await models.BillingInfo.findAll({
-    //   attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
-    //   include: [{
-    //     model: models.ClaimInfoVisits,
-    //     attributes:[],
-    //     include: [{
-    //       model: models.ClaimInfo
-    //     }],
-    //   }],
-    //   group : ['ClaimInfoVisit->ClaimInfo.id'],
-    //   raw: true
-    // });
-
-
-
-      // var claims = await models.ClaimInfo.findAll({
-      //   attributes: ['id'],
-      //   include: [{
-      //     model:models.ClaimInfoVisits,
-      //     attributes: [],
-      //     include: [{
-      //       model: models.BillingInfo,
-      //       attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
-      //     }],
-      //   }],
-      //   group : ['claiminfo.id', 'ClaimInfoVisits->BillingInfos.id'],
-      //   raw: true
-      // });
-
-
-      // var claims = await models.sequelize.query(`
-      // SELECT [ClaimInfo].[id],[ClaimInfo].[createdBy],
-      //        Sum([value])                         AS
-      //        [ClaimInfoVisits.BillingInfos.total]
-      // FROM   [claiminfos] AS [ClaimInfo]
-      //        LEFT OUTER JOIN [claiminfovisits] AS [ClaimInfoVisits]
-      //                     ON [ClaimInfo].[id] = [claiminfovisits].[claiminfoid]
-      //        LEFT OUTER JOIN [billinginfos] AS [ClaimInfoVisits->BillingInfos]
-      //                     ON [claiminfovisits].[id] =
-      //                        [ClaimInfoVisits->BillingInfos].[visitid]
-      // GROUP  BY [claiminfo].[id], [ClaimInfo].[createdBy
-      // `, { type: sequelize.QueryTypes.SELECT})
-
 
 
       var claims = await models.ClaimInfo.findAll({
@@ -347,20 +366,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
       });
 
 
-      // var newClaims = claims.claims.map( claimInfo => {
-      //   console.log(claimInfo)
-      //   claimInfo.total = d3.sum(claimInfo.ClaimInfoVisits, vis => d3.sum(vis.BillingInfos, billing => billing.value))
-      //   return claimInfo
-      // });
-
-      // var claims = await models.ClaimInfo.findAll({
-      //   include: [{
-      //     model:models.ClaimInfoVisits
-      //   }]
-      // });
-
-       // var newArray= d3.group(claims, d => d.id)
-
        response = claims
   } catch(e) {
     console.log(e)
@@ -370,10 +375,46 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 }));
 
 
-router.get('/claimByID', awaitErorrHandlerFactory(async (req, res, next) => {
- 	 res.json('response');
-	})
-);
+router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
+  var response = {};
+
+  try {
+    var claimData = await models.ClaimInfo.findOne({where:{id:req.query.claimID}});
+
+    var visitsData = await models.ClaimInfoVisits.findAll({
+      where:{claimInfoId:req.query.claimID},
+      include:{
+        model:models.ClaimInfoVisitsFiles
+      },
+    });
+
+    response = {claimData, visitsData}
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
+  res.json(response);
+}));
+
+
+router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {
+  var response = {};
+  try {
+    var visitsData = await models.ClaimInfoVisits.findAll({
+      where:{claimInfoId:'RIH/YYYY/XX/11111111-18'},
+      include:{
+        model:models.ClaimInfoVisitsFiles
+      },
+    });
+
+    console.log(visitsData)
+    response = {visitsData}
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
+  res.json(response);
+}));
 
 
 

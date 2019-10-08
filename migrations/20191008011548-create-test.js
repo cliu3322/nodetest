@@ -1,28 +1,15 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('ClaimInfoVisitsFiles', {
-      uid: {
+    return queryInterface.createTable('Tests', {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      visitId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'ClaimInfoVisits',
-          key: 'id'
-        }
-      },
       name: {
         type: Sequelize.STRING
-      },
-      url: {
-        type: Sequelize.STRING
-      },
-      active: {
-        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -39,6 +26,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('ClaimInfoVisitsFiles');
+    return queryInterface.dropTable('Tests');
   }
 };

@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     url: DataTypes.STRING,
     active: DataTypes.BOOLEAN
-  }, {});
+  }, {
+    paranoid: true,
+    timestamps: true,
+  });
   ClaimInfoVisitsFiles.associate = function(models) {
     // associations can be defined here
     ClaimInfoVisitsFiles.belongsTo(models.ClaimInfoVisits, {

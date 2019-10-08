@@ -136,4 +136,16 @@ router.get('/name', async function(req, res, next) {
 
 });
 
+router.get('/test',async function(req, res, next) {
+  //const response = await models.Test.destroy({name:'qewr'});
+  // const response = await models.Test.findOne({ where: { id: 1 }} ).then(task => {
+  //   // now you see me...
+  //   return task.destroy();
+  // })
+
+  const response = await models.Test.create({ name:'werwer' } )
+
+  res.json(response)
+});
+
 module.exports = router;
