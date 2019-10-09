@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     accountHoldersName: DataTypes.STRING,
     bankAccountNumber: DataTypes.STRING,
     bankAddress: DataTypes.STRING,
+    bankName: DataTypes.STRING,
     cause: DataTypes.STRING,
     contactEmail: DataTypes.STRING,
     contactFirstName: DataTypes.STRING,
@@ -31,7 +32,9 @@ module.exports = (sequelize, DataTypes) => {
     policyVip: DataTypes.BOOLEAN,
     reimbusementCurrency: DataTypes.STRING,
     relationshipToPatient: DataTypes.STRING,
-    swift: DataTypes.STRING
+    swift: DataTypes.STRING,
+    RCExchangeRate: DataTypes.FLOAT,
+    RCExchangeRateDate: DataTypes.DATE
   }, {});
   ClaimInfo.associate = function(models) {
     // associations can be defined here

@@ -161,7 +161,7 @@ router.post('/insertClaimInfoVisits', (req, res, next) => {
 })
 
 
-router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+router.post('/insertBillingInfoVisits', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
   var form = new formidable.IncomingForm();
   form.uploadDir = "../upload/billinginfo";
@@ -196,29 +196,20 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
         });
 
         const fileRecord = await models.BillingInfoFiles.create(
-          {fileName:newFileName, fileAddress: form.uploadDir, visitId: fields.visitId}
+          {name:newFileName, url: "/upload/billinginfo/" + newFileName, visitId: fields.visitId}
         )
 
       }
 
       //upload currency info
 
-      await models.ClaimInfoVisits.findByPk(fields.visitId).then((visit) => {
+      var visit = await models.ClaimInfoVisits.findByPk(fields.visitId).then((visit) => {
 
         return visit.update(JSON.parse(fields.currency));
       })
 
-      //insert billingInfo
-      var billingInfo = JSON.parse(fields.billingInfo)
 
-      for (var i = 0; i < billingInfo.length; i++) {
-        console.log(fields)
-        billingInfo[i].visitId=fields.visitId
-        await models.BillingInfo.create(billingInfo[i]);
-
-      }
-
-      res.sendStatus(200)
+      res.send(visit)
 
     }
     catch(e) {
@@ -226,26 +217,70 @@ router.post('/insertBillingInfo', awaitErorrHandlerFactory(async (req, res, next
       res.sendStatus(500)
     }
 
-    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
-    //     if (err) next(err);
-    // });
   });
+
+}));
+
+router.post('/RCExchangeRate', awaitErorrHandlerFactory(async (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  try {
+    var claimInfoResult = await models.ClaimInfo.findByPk(req.body.claimID).then((claimInfo) => {
+      return models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+        return exchangeRate? claimInfo.update({RCExchangeRate:exchangeRate.USDper, RCExchangeRateDate:exchangeRate.date, status:'pending'}):null;
+      })
+    })
+
+    res.send(claimInfoResult)
+  }
+  catch(e) {
+    console.log(e)
+    res.sendStatus(500)
+  }
 
 }));
 
 router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
-  console.log(req.body)
+  try {
+    console.log(req.body.billinginfos)
+    var deletedBillingInfos = await models.BillingInfo.findAll({
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id'],
+        include: [{
+          attributes: ['id'],
+          model: models.ClaimInfo,
+          where: {id: req.body.claimID}
+        }],
+      }],
+    }).then(BillingInfos => {
+      console.log(BillingInfos)
+    })
 
-  const billingInfoRecord = await models.BillingInfo.create(req.body)
+    var insertBillingInfos = await models.BillingInfo.bulkCreate(req.body.billinginfos)
 
-  res.send(billingInfoRecord);
+    res.send(insertBillingInfos);
+    // User.bulkCreate([
+    //   { username: 'barfooz', isAdmin: true },
+    //   { username: 'foo', isAdmin: true },
+    //   { username: 'bar', isAdmin: false }
+    // ]).then(() => { // Notice: There are no arguments here, as of right now you'll have to...
+    //   return User.findAll();
+    // }).then(users => {
+    //   console.log(users) // ... in order to get the array of user objects
+    // })
+
+  }
+  catch(e) {
+    console.log(e)
+    res.sendStatus(500)
+  }
 
 }));
 
 router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
-  console.log(req.body)
+
 
   const visits = await models.ClaimInfoVisits.findAll({
     where:{claimInfoId:req.body.claimID},
@@ -253,7 +288,7 @@ router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) =>
       model:models.BillingInfo
     },
   })
-  console.log(visits)
+
   res.send(visits);
 
 }));
@@ -307,7 +342,7 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
       if(files.length > 1)
         throw new Error('file length is longer than 1');
-
+        
       const fileRecord = await models.DocumentsFiles.create({fileName:files[0].name, path: files[0].path, visitId: data.visitId, active:true})
       res.send(fileRecord);
     } catch(e) {
@@ -325,12 +360,12 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 router.post('/insertdocumentsnotes', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
-    console.log('req.body.path', req.body.path)
+
     const result = await models.DocumentsFiles.findByPk(req.body.path).then((DocumentsFile) => {
-      console.log(DocumentsFile)
+
       return DocumentsFile.update({notes:req.body.notes});
     })
-    console.log(result.id)
+
 
   } catch(e) {
     console.log(e)
@@ -407,7 +442,7 @@ router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {
       },
     });
 
-    console.log(visitsData)
+
     response = {visitsData}
   } catch(e) {
     console.log(e)
