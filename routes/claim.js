@@ -278,6 +278,20 @@ router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next
 
 }));
 
+router.post('/uploadBillingInfoOtherName', awaitErorrHandlerFactory(async (req, res, next) => {
+  //https://github.com/node-formidable/node-formidable/issues/260
+  try {
+
+    res.send('insertBillingInfos');
+
+  }
+  catch(e) {
+    console.log(e)
+    res.sendStatus(500)
+  }
+
+}));
+
 router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
 
@@ -342,7 +356,7 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
       if(files.length > 1)
         throw new Error('file length is longer than 1');
-        
+
       const fileRecord = await models.DocumentsFiles.create({fileName:files[0].name, path: files[0].path, visitId: data.visitId, active:true})
       res.send(fileRecord);
     } catch(e) {

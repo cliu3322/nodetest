@@ -1,29 +1,32 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const RejectedClaimsOldData = sequelize.define('RejectedClaimsOldData', {
+  const RejectedClaimsExcel = sequelize.define('RejectedClaimsExcel', {
 
     patientName: DataTypes.STRING,
     policyNumber: DataTypes.STRING,
     cause: DataTypes.STRING,
     createdAt: DataTypes.DATE,
     ReimbursementCurrency: DataTypes.STRING,
-    contactEmail: DataTypes.STRING,
+    email: DataTypes.STRING,
     contactPhoneNumber: DataTypes.STRING,
-    bankAccountNumber: DataTypes.STRING,
+    contactHomeAddress: DataTypes.STRING,
+    bankAccount: DataTypes.STRING,
     accountHoldersName: DataTypes.STRING,
     bankName: DataTypes.STRING,
     bankAddress: DataTypes.STRING,
     swift: DataTypes.STRING,
     ibanCodeSortCode: DataTypes.STRING,
     status: DataTypes.STRING,
-    rejector: DataTypes.STRING,
+    decisioner: DataTypes.STRING,
     decisionDate: DataTypes.DATE,
+    decisionReason: DataTypes.STRING,
     decisionReason: DataTypes.STRING,
     RCExchangeRate: DataTypes.STRING,
     RCExchangeRateDate: DataTypes.DATE,
+    turnaround: DataTypes.INTEGER,
 
   }, {});
-  RejectedClaimsOldData.associate = function(models) {
+  RejectedClaimsExcel.associate = function(models) {
   };
-  return RejectedClaimsOldData;
+  return RejectedClaimsExcel;
 };

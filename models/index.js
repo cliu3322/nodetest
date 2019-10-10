@@ -8,6 +8,7 @@
 
 //node_modules/.bin/sequelize model:generate --name BillingInfo --attributes visitId:INTEGER,billingCat:INTEGER,billingSubCat:INTEGER,value:FLOAT
 //node_modules/.bin/sequelize model:generate --name BillingInfoFiles --attributes visitId:INTEGER,name:STRING,url:STRING,active:BOOLEAN,deletedAt:DATE
+//node_modules/.bin/sequelize model:generate --name BillingInfoOtherName --attributes visitId:INTEGER,value:STRING,deletedAt:DATE
 //node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes path:STRING,fileName:STRING,notes:STRING,visitId:INTEGER,active:BOOLEAN
 // node_modules/.bin/sequelize model:generate --name BenefitCategories --attributes name:string
 // node_modules/.bin/sequelize model:generate --name BenefitSubCategories --attributes categoryId:INTEGER,name:string
@@ -19,7 +20,7 @@
 
 
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo
-
+//node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo2
 
 
 
@@ -41,6 +42,9 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
+  config.logging = function (str) {
+        // do your own logging
+  }
   console.log(config)
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
