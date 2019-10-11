@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       value: {
-        type: Sequelize.FLOAT
+        type: Sequelize.BIGINT
       },
       createdAt: {
         allowNull: false,

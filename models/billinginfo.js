@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     visitId: DataTypes.INTEGER,
     billingCat: DataTypes.INTEGER,
     billingSubCat: DataTypes.INTEGER,
-    value: DataTypes.FLOAT
+    value: DataTypes.BIGINT
   }, {});
   BillingInfo.associate = function(models) {
     // associations can be defined here
