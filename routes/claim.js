@@ -402,9 +402,10 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
       var claims = await models.ClaimInfo.findAll({
+        attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt'],
         include: [{
           model:models.ClaimInfoVisits,
-          attributes: ['id'],
+          attributes: ['id', 'billingUsdper'],
           include: [{
             attributes: ['value'],
             model: models.BillingInfo,
@@ -415,7 +416,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
       });
 
 
-       response = claims
+      response = claims
   } catch(e) {
     console.log(e)
     response.error = e;

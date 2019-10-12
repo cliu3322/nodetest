@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         policyNumber: DataTypes.STRING,
         cause: DataTypes.STRING,
         createdAt: DataTypes.DATE,
-        ReimbursementCurrency: DataTypes.STRING,
+        reimbursementCurrency: DataTypes.STRING,
         email: DataTypes.STRING,
         contactPhoneNumber: DataTypes.STRING,
         contactHomeAddress: DataTypes.STRING,
@@ -30,15 +30,16 @@ module.exports = (sequelize, DataTypes) => {
         doctorName: DataTypes.STRING,
         billingCurrency: DataTypes.STRING,
         claimedTotalUSD: DataTypes.STRING,
-        billingTotalUSD: DataTypes.STRING,
+        billingTotalbilling: DataTypes.STRING,
         hospitalDate: DataTypes.DATE,
-
+        rejectReason:DataTypes.STRING,
+        turnaround: DataTypes.INTEGER,
   }
   for (var i = 1; i < 42; i++) {
     attributes[i] = DataTypes.FLOAT
   }
-  const ApprovedClaimsExcel = sequelize.define('ApprovedClaimsExcel', attributes, {});
-  ApprovedClaimsExcel.associate = function(models) {
+  const LegacyExcel = sequelize.define('LegacyExcel', attributes, {});
+  LegacyExcel.associate = function(models) {
   };
-  return ApprovedClaimsExcel;
+  return LegacyExcel;
 };
