@@ -38,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     status:DataTypes.STRING,
     decisioner:DataTypes.STRING,
     decisionDate:DataTypes.DATE,
-    decisionReason:DataTypes.STRING,
+    note:DataTypes.STRING,
   }, {});
   ClaimInfo.associate = function(models) {
     // associations can be defined here

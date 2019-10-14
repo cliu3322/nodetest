@@ -25,6 +25,8 @@ const awaitErorrHandlerFactory = middleware => {
   };
 };
 
+
+
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a test');
@@ -32,36 +34,241 @@ router.get('/', function(req, res, next) {
 
 
 
-router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
-  const response = {};
+router.post('/upload', awaitErorrHandlerFactory(async (req, res, next) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../upload/temp";
+  form.keepExtensions = true;
+  form.parse(req);
+  form.on('error', err =>  {
+      res.sendStatus(500)
+  });
+
+  form.on('file', (name, file) =>  {
+
+  });
+
+  form.on('file', (name, file) =>  {
+    res.send({name:file.name, path:file.path });
+  });
+
+
+}));
+
+router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
+  var response = {};
+
   try {
-    var input
-    if(req.body.claimID === null) {
-
-      const policyCount = await models.ClaimInfo.count({policyNumber:req.body.claimData.policyNumber})
-
-      req.body.claimData.id = req.body.claimData.policyNumber+"-"+(policyCount+1)
-      //insert main table
-      input= await models.ClaimInfo.create(req.body.claimData);
-    } else {
-
-      input = await models.ClaimInfo.findOne({where:{id:req.body.claimID}}).then(ClaimInfo => {
-
-        return ClaimInfo.update(req.body.claimData)
-      });
-    }
-
-
-    response.claimID = input.dataValues.id;
-
+    var ClaimInfo = await models.ClaimInfo.findOne(
+      {
+        where:{id:req.query.claimID},
+        attributes: ['id', 'policyFirstName','policyLastName','policyNumber','policyVip','policyType','policyEmail','policyGroupPolicy',
+        'contactFirstName','contactLastName','contactEmail','contactHomeAddress','contactPhoneNumber','contactPhoneNumberCountryCode','relationshipToPatient',
+        'accountHoldersName','bankName','bankAddress','reimbusementCurrency','bankAccountNumber','ibanCodeSortCode','swift',
+        'gop','cause'],
+        include: [{
+          model:models.ClaimInfoVisits,
+          //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
+          include: [{model: models.ClaimInfoVisitsFiles}, {model: models.BillingInfoFiles}, {model: models.BillingInfo}],
+        }],
+      }
+    );
+    // model: models.ClaimInfoVisitsFiles,
+    //  model: models.BillingInfos,
+    // // model: models.BillingInfoFiles,
+    // // attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
+    res.json(ClaimInfo);
+    // var visitsData = await models.ClaimInfoVisits.findAll({
+    //   where:{claimInfoId:req.query.claimID},
+    //   include:{
+    //     model:models.ClaimInfoVisitsFiles
+    //   },
+    // });
+    //
+    // response = {claimData, visitsData}
   } catch(e) {
     console.log(e)
-    response.error = e;
-    res.sendStatus(500)
+    res.sendStatus(500).send(e)
   }
 
-  res.json(response);
 }));
+
+router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
+  const response = {};
+
+  var claimInfo =  req.body
+
+  if (!req.body.id){
+
+
+    try {
+
+      //get claimId
+      const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
+      claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
+      //rename ClaimInfoVisitsFiles
+      claimInfo.ClaimInfoVisits = claimInfo.ClaimInfoVisits.map(visit => {
+        visit.ClaimInfoVisitsFiles =  visit.ClaimInfoVisitsFiles.map(ClaimInfoVisitsFile => {
+          ClaimInfoVisitsFile.name =  claimInfo.id +'-' + visit.visitNumber + path.extname(ClaimInfoVisitsFile.name).toLowerCase();
+          // fs.copyFile(ClaimInfoVisitsFile.url, ClaimInfoVisitsFile.url.replace('temp','claiminfo'), (err) => {
+          //   if (err) throw err;
+          //   console.log('source.txt was copied to destination.txt');
+          // });
+          return ClaimInfoVisitsFile
+        })
+        return visit
+      })
+
+      models.ClaimInfo.create(claimInfo,{
+            include: [{
+              model: models.ClaimInfoVisits,
+              include: [{
+                model: models.ClaimInfoVisitsFiles,
+              }],
+            }],
+      }).then(claimInfo => {
+        res.json(claimInfo);
+      }).catch( e => {
+        console.log(e)
+        res.sendStatus(500).send(e)
+      })
+    } catch(e) {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    }
+  }
+
+}));
+
+router.post('/updateReimbusementCurrency', awaitErorrHandlerFactory(async (req, res, next) => {
+  const response = {};
+
+  var claimInfo =  req.body
+  //console.log(claimInfo)
+  if (claimInfo.id){
+
+    try {
+      var filter = {
+        where: {
+          id: claimInfo.id
+        },
+        include: [{
+          model: models.ClaimInfoVisits,
+          include: [{
+            model: models.ClaimInfoVisitsFiles,
+          }],
+        }]
+      };
+      //
+      // models.sequelize.transaction(t => {
+
+        // chain all your queries here. make sure you return them.
+
+        models.ClaimInfo.findByPk(claimInfo.id).then(claimInfo => {
+          models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+            claimInfo.update({
+              RCExchangeRate: exchangeRate.perUSD,
+              RCExchangeRateDate:exchangeRate.updatedAt
+            }).then(result => {
+              console.log(result)
+              res.send(result)
+            })
+          })
+        })
+      //
+      // }).then(result => {
+      //   console.log('result',result)
+      // }).catch(err => {
+      //   // Transaction has been rolled back
+      //   // err is whatever rejected the promise chain returned to the transaction callback
+      // });
+      // models.ClaimInfo.findOne(filter).then(function (claimInfo) {
+      //   if (claimInfo) {
+      //     return claimInfo.ClaimInfoVisits.findAll(updateProfile).then(function (result) {
+      //       return result;
+      //     });
+      //   } else {
+      //     throw new Error("no such product type id exist to update");
+      //   }
+      // });
+      //
+      // models.ClaimInfo.findOne(claimInfo,{
+      //       include: [{
+      //         model: models.ClaimInfoVisits,
+      //         include: [{
+      //           model: models.ClaimInfoVisitsFiles,
+      //         }],
+      //       }],
+      // }).then(claimInfo => {
+      //   res.json(claimInfo);
+      // }).catch( e => {
+      //   console.log(e)
+      //   res.sendStatus(500).send(e)
+      // })
+    } catch(e) {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    }
+  } else {
+    res.sendStatus(500).send('need a claimID!')
+  }
+
+}));
+
+router.post('/uploadBillingInfo', awaitErorrHandlerFactory( (req, res, next) => {
+//     value:req.body.value
+  console.log(req.body)
+  console.log('adsfadfsd')
+  models.BillingInfo.findOne({
+    where:{
+      visitId:req.body.visitId,
+      billingCat:req.body.billingCat,
+      billingSubCat:req.body.billingSubCat
+    }
+  }).then(billing => {
+    if (billing) {
+      return billing.update({
+        value:req.body.value
+      })
+    } else {
+      return models.BillingInfo.create(req.body)
+    }
+  }).then(result => {
+    res.send(result)
+  }).catch (e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+}));
+
+router.post('/updateBillingCurrency', awaitErorrHandlerFactory( (req, res, next) => {
+
+  console.log(req.body)
+  models.ClaimInfoVisits.findOne({
+    where:{
+      id:req.body.id,
+    }
+  }).then(visit => {
+    if (visit) {
+      return visit.update({
+        billingCurrency:req.body.billingCurrency,
+        currencyDate:req.body.currencyDate,
+        billingUsdper:req.body.billingUsdper
+      })
+    } else {
+      return null
+    }
+  }).then(result => {
+    res.send(result)
+  }).catch (e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+}));
+
 
 router.post('/insertClaimInfoVisits', (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
@@ -223,6 +430,7 @@ router.post('/insertBillingInfoVisits', awaitErorrHandlerFactory(async (req, res
 
 router.post('/RCExchangeRate', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
+  console.log('~~~~~~~~~~~~~~~~~~~')
   try {
     var claimInfoResult = await models.ClaimInfo.findByPk(req.body.claimID).then((claimInfo) => {
       return models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
@@ -239,44 +447,6 @@ router.post('/RCExchangeRate', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
-router.post('/uploadBillingInfo', awaitErorrHandlerFactory(async (req, res, next) => {
-  //https://github.com/node-formidable/node-formidable/issues/260
-  try {
-    console.log(req.body.billinginfos)
-    var deletedBillingInfos = await models.BillingInfo.findAll({
-      include: [{
-        model:models.ClaimInfoVisits,
-        attributes: ['id'],
-        include: [{
-          attributes: ['id'],
-          model: models.ClaimInfo,
-          where: {id: req.body.claimID}
-        }],
-      }],
-    }).then(BillingInfos => {
-      console.log(BillingInfos)
-    })
-
-    var insertBillingInfos = await models.BillingInfo.bulkCreate(req.body.billinginfos)
-
-    res.send(insertBillingInfos);
-    // User.bulkCreate([
-    //   { username: 'barfooz', isAdmin: true },
-    //   { username: 'foo', isAdmin: true },
-    //   { username: 'bar', isAdmin: false }
-    // ]).then(() => { // Notice: There are no arguments here, as of right now you'll have to...
-    //   return User.findAll();
-    // }).then(users => {
-    //   console.log(users) // ... in order to get the array of user objects
-    // })
-
-  }
-  catch(e) {
-    console.log(e)
-    res.sendStatus(500)
-  }
-
-}));
 
 router.post('/uploadBillingInfoOtherName', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
@@ -424,27 +594,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-
-router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
-  var response = {};
-
-  try {
-    var claimData = await models.ClaimInfo.findOne({where:{id:req.query.claimID}});
-
-    var visitsData = await models.ClaimInfoVisits.findAll({
-      where:{claimInfoId:req.query.claimID},
-      include:{
-        model:models.ClaimInfoVisitsFiles
-      },
-    });
-
-    response = {claimData, visitsData}
-  } catch(e) {
-    console.log(e)
-    response.error = e;
-  }
-  res.json(response);
-}));
 
 
 router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {

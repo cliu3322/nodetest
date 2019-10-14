@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'visitId',  targetKey: 'id'
     });
 
+    ClaimInfoVisits.hasMany(models.BillingInfoFiles, {
+      foreignKey: 'visitId',  targetKey: 'id'
+    });
+
+
     ClaimInfoVisits.belongsTo(models.ClaimInfo, {
       foreignKey: 'claimInfoId',  targetKey: 'id'
     });

@@ -42,10 +42,10 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  config.logging = function (str) {
-        // do your own logging
-        console.log(str)
-  }
+  // config.logging = function (str) {
+  //       // do your own logging
+  //       console.log(str)
+  // }
   console.log(config)
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
