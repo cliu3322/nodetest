@@ -54,6 +54,48 @@ router.post('/upload', awaitErorrHandlerFactory(async (req, res, next) => {
 
 }));
 
+router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../upload/documents";
+  form.keepExtensions = true;
+  form.multiples = true;
+  form.parse(req);
+
+  var files = []
+  var data = {}
+  form.on('file', function (name, file){
+    files.push(file)
+  });
+  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
+  form.on('field', function(name, value) {
+    data[name]= value;
+  });
+
+  form.on('fileBegin', function(name, file) {
+
+  });
+
+  form.on('end',async function() {
+    try {
+
+      if(files.length > 1)
+        throw new Error('file length is longer than 1');
+
+      const fileRecord = await models.DocumentsFiles.create({name:files[0].name, url: files[0].path, visitId: data.visitId, active:true})
+      res.send(fileRecord);
+    } catch(e) {
+      console.log(e)
+      res.sendStatus(500)
+    }
+
+    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
+    //     if (err) next(err);
+    // });
+  });
+
+}));
+
+
 router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
 
@@ -61,30 +103,15 @@ router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
     var ClaimInfo = await models.ClaimInfo.findOne(
       {
         where:{id:req.query.claimID},
-        attributes: ['id', 'policyFirstName','policyLastName','policyNumber','policyVip','policyType','policyEmail','policyGroupPolicy',
-        'contactFirstName','contactLastName','contactEmail','contactHomeAddress','contactPhoneNumber','contactPhoneNumberCountryCode','relationshipToPatient',
-        'accountHoldersName','bankName','bankAddress','reimbusementCurrency','bankAccountNumber','ibanCodeSortCode','swift',
-        'gop','cause'],
         include: [{
           model:models.ClaimInfoVisits,
           //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
-          include: [{model: models.ClaimInfoVisitsFiles}, {model: models.BillingInfoFiles}, {model: models.BillingInfo}],
+          include: [{model: models.ClaimInfoVisitsFiles}, {model: models.BillingInfoFiles}, {model: models.BillingInfo}, {model: models.DocumentsFiles},],
         }],
       }
     );
-    // model: models.ClaimInfoVisitsFiles,
-    //  model: models.BillingInfos,
-    // // model: models.BillingInfoFiles,
-    // // attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
     res.json(ClaimInfo);
-    // var visitsData = await models.ClaimInfoVisits.findAll({
-    //   where:{claimInfoId:req.query.claimID},
-    //   include:{
-    //     model:models.ClaimInfoVisitsFiles
-    //   },
-    // });
-    //
-    // response = {claimData, visitsData}
+
   } catch(e) {
     console.log(e)
     res.sendStatus(500).send(e)
@@ -92,118 +119,149 @@ router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
 
 }));
 
+router.post('/addClaimVisit', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  models.ClaimInfoVisits.create({}).then(claimInfoVisit => {
+    res.json(claimInfoVisit);
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+}));
+
+// router.post('/insertOrUpdateClaimInfo2', awaitErorrHandlerFactory(async (req, res, next) => {
+//   const response = {};
+//
+//   var claimInfo =  req.body
+//
+//   if (!req.body.id){
+//
+//
+//     try {
+//
+//       //get claimId
+//       const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
+//       claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
+//       //rename ClaimInfoVisitsFiles
+//       claimInfo.ClaimInfoVisits = claimInfo.ClaimInfoVisits.map(visit => {
+//         visit.ClaimInfoVisitsFiles =  visit.ClaimInfoVisitsFiles.map(ClaimInfoVisitsFile => {
+//           ClaimInfoVisitsFile.name =  claimInfo.id +'-' + visit.visitNumber + path.extname(ClaimInfoVisitsFile.name).toLowerCase();
+//           // fs.copyFile(ClaimInfoVisitsFile.url, ClaimInfoVisitsFile.url.replace('temp','claiminfo'), (err) => {
+//           //   if (err) throw err;
+//           //   console.log('source.txt was copied to destination.txt');
+//           // });
+//           return ClaimInfoVisitsFile
+//         })
+//         return visit
+//       })
+//
+//       models.ClaimInfo.create(claimInfo,{
+//             include: [{
+//               model: models.ClaimInfoVisits,
+//               include: [{
+//                 model: models.ClaimInfoVisitsFiles,
+//               }],
+//             }],
+//       }).then(claimInfo => {
+//         res.json(claimInfo);
+//       }).catch( e => {
+//         console.log(e)
+//         res.sendStatus(500).send(e)
+//       })
+//     } catch(e) {
+//       console.log(e)
+//       res.sendStatus(500).send(e)
+//     }
+//   }
+//
+// }));
+
 router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
 
   var claimInfo =  req.body
 
-  if (!req.body.id){
-
 
     try {
+      models.ClaimInfo.findByPk(req.body.id, {attributes: ['id']}).then(async ClaimInfo => {
+        var claim
+        if (ClaimInfo) {
+          claim = await ClaimInfo.update(claimInfo)
+        } else {
+          const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
+          claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
+          claim = await models.ClaimInfo.create(claimInfo)
+        }
 
-      //get claimId
-      const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
-      claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
-      //rename ClaimInfoVisitsFiles
-      claimInfo.ClaimInfoVisits = claimInfo.ClaimInfoVisits.map(visit => {
-        visit.ClaimInfoVisitsFiles =  visit.ClaimInfoVisitsFiles.map(ClaimInfoVisitsFile => {
-          ClaimInfoVisitsFile.name =  claimInfo.id +'-' + visit.visitNumber + path.extname(ClaimInfoVisitsFile.name).toLowerCase();
-          // fs.copyFile(ClaimInfoVisitsFile.url, ClaimInfoVisitsFile.url.replace('temp','claiminfo'), (err) => {
-          //   if (err) throw err;
-          //   console.log('source.txt was copied to destination.txt');
-          // });
-          return ClaimInfoVisitsFile
-        })
-        return visit
-      })
+        if (claimInfo.ClaimInfoVisits) {
+          const tasks = claimInfo.ClaimInfoVisits.map(ClaimInfoVisit => {
+            return new Promise(
+              (resolve, reject) => {
 
-      models.ClaimInfo.create(claimInfo,{
-            include: [{
-              model: models.ClaimInfoVisits,
-              include: [{
-                model: models.ClaimInfoVisitsFiles,
-              }],
-            }],
-      }).then(claimInfo => {
-        res.json(claimInfo);
-      }).catch( e => {
-        console.log(e)
-        res.sendStatus(500).send(e)
+                models.ClaimInfoVisits.findByPk(ClaimInfoVisit.id).then(async target => {
+                  var visit
+                  ClaimInfoVisit.claimInfoId = claim.id
+                  if(target){
+                    visit = await target.update(ClaimInfoVisit)
+                  } else {
+                    visit = await models.ClaimInfoVisits.create(ClaimInfoVisit)
+                  }
+                  models.ClaimInfoVisitsFiles.bulkCreate(ClaimInfoVisit.ClaimInfoVisitsFiles).then(ClaimInfoVisitsFiles => {
+                    resolve(ClaimInfoVisitsFiles)
+                  })
+                  console.log(ClaimInfoVisit.ClaimInfoVisitsFiles)
+
+                }).catch (e => reject(e))
+              }
+            )
+          });
+
+          return Promise.all(tasks)
+          .then(result => {
+
+            return claim
+          }).catch(e => {throw e})
+          //console.log(result)
+        } else {
+          return claim
+        }
+      }).then(result => {
+        res.send(result)
+      }).catch (e => {
+        throw e
       })
     } catch(e) {
       console.log(e)
       res.sendStatus(500).send(e)
     }
-  }
+
 
 }));
 
 router.post('/updateReimbusementCurrency', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
-
+console.log(req.body)
   var claimInfo =  req.body
   //console.log(claimInfo)
   if (claimInfo.id){
 
     try {
-      var filter = {
-        where: {
-          id: claimInfo.id
-        },
-        include: [{
-          model: models.ClaimInfoVisits,
-          include: [{
-            model: models.ClaimInfoVisitsFiles,
-          }],
-        }]
-      };
-      //
-      // models.sequelize.transaction(t => {
-
-        // chain all your queries here. make sure you return them.
-
-        models.ClaimInfo.findByPk(claimInfo.id).then(claimInfo => {
-          models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+      models.ClaimInfo.findByPk(claimInfo.id).then(claimInfo => {
+        models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+          if(exchangeRate){
             claimInfo.update({
               RCExchangeRate: exchangeRate.perUSD,
               RCExchangeRateDate:exchangeRate.updatedAt
             }).then(result => {
-              console.log(result)
-              res.send(result)
-            })
-          })
+              res.send(claimInfo)
+            }).catch(e => {throw e})
+          } else {
+            res.send(claimInfo)
+          }
         })
-      //
-      // }).then(result => {
-      //   console.log('result',result)
-      // }).catch(err => {
-      //   // Transaction has been rolled back
-      //   // err is whatever rejected the promise chain returned to the transaction callback
-      // });
-      // models.ClaimInfo.findOne(filter).then(function (claimInfo) {
-      //   if (claimInfo) {
-      //     return claimInfo.ClaimInfoVisits.findAll(updateProfile).then(function (result) {
-      //       return result;
-      //     });
-      //   } else {
-      //     throw new Error("no such product type id exist to update");
-      //   }
-      // });
-      //
-      // models.ClaimInfo.findOne(claimInfo,{
-      //       include: [{
-      //         model: models.ClaimInfoVisits,
-      //         include: [{
-      //           model: models.ClaimInfoVisitsFiles,
-      //         }],
-      //       }],
-      // }).then(claimInfo => {
-      //   res.json(claimInfo);
-      // }).catch( e => {
-      //   console.log(e)
-      //   res.sendStatus(500).send(e)
-      // })
+      })
+
     } catch(e) {
       console.log(e)
       res.sendStatus(500).send(e)
@@ -269,103 +327,112 @@ router.post('/updateBillingCurrency', awaitErorrHandlerFactory( (req, res, next)
 
 }));
 
+router.post('/insertBillingInfoFiles', awaitErorrHandlerFactory( (req, res, next) => {
 
-router.post('/insertClaimInfoVisits', (req, res, next) => {
-  //https://github.com/node-formidable/node-formidable/issues/260
-  var form = new formidable.IncomingForm();
-  form.uploadDir = "../upload/claiminfo";
-  form.keepExtensions = true;
-  form.multiples = true;
-  form.parse(req);
-
-  var files = []
-  var filesData = []
-  var visit = {}
-  form.on('file', function (name, file){
-    files.push(file)
-  });
-  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
-  form.on('field', function(name, value) {
-
-    switch (name) {
-      case 'visitdata':
-        visit[name]= value;
-        break;
-      case 'files':
-        filesData.push(value)
-        break;
-      default:
-
-    }
-  });
-
-  form.on('fileBegin', function(name, file) {
-
-  });
-
-  form.on('end',async function() {
-    try {
-
-      //insert visitdata
-      var visitdata = JSON.parse(visit.visitdata)
-      var visitRecord
-      var visitFileList = []
-
-      if (visitdata.id === null ||visitdata.id === undefined ) {
-        visitRecord = await models.ClaimInfoVisits.create(visitdata)
-
-      } else {
-        visitRecord = await models.ClaimInfoVisits.findOne({where:{id:visitdata.id}}).then(ClaimInfoVisit => {
-          delete visitdata['id'];
-          return ClaimInfoVisit.update(visitdata)
-        });
-
-        models.ClaimInfoVisitsFiles.findAll({where:{visitId:visitdata.id}}).then(ClaimInfoVisitsFiles => {
-          ClaimInfoVisitsFiles.destroy()
-        });
-
-        for (var i = 0; i < files.length; i++) {
-          filesData[i].uid
-          models.ClaimInfoVisitsFiles.findOne({ where: { uid: filesData[i].uid }, paranoid: false }).then(ClaimInfoVisitsFiles => {
-            ClaimInfoVisitsFiles.restore()
-          });
-        }
-      }
-
-      //upload files
-
-      for (var i = 0; i < files.length; i++) {
-
-        var extension = path.extname(files[i].name).toLowerCase();
-        var newFileName = visitdata.claimInfoId.replace(/\//g,'_')+'-'+visitdata.visitNumber+'-'+i+extension
-        fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
-            if (err) next(err);
-        });
-
-        const fileRecord = await models.ClaimInfoVisitsFiles.create({name:newFileName, url: "/upload/claiminfo/" + newFileName, visitId: visitRecord.dataValues.id, active:true}, {raw: true})
-
-        visitFileList.push(fileRecord.dataValues)
-      }
-      visitRecord.dataValues.visitFileList =  visitFileList
+  models.BillingInfoFiles.create(req.body).then(result => {
+    res.send(result)
+  }).catch (e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 
 
-
-      res.send(visitRecord);
-
-    }
-    catch(e) {
-      console.log(e)
-      res.sendStatus(500)
-    }
+}));
 
 
-
-    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
-    //     if (err) next(err);
-    // });
-  });
-
-})
+// router.post('/insertClaimInfoVisits', (req, res, next) => {
+//   //https://github.com/node-formidable/node-formidable/issues/260
+//   var form = new formidable.IncomingForm();
+//   form.uploadDir = "../upload/claiminfo";
+//   form.keepExtensions = true;
+//   form.multiples = true;
+//   form.parse(req);
+//
+//   var files = []
+//   var filesData = []
+//   var visit = {}
+//   form.on('file', function (name, file){
+//     files.push(file)
+//   });
+//   //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
+//   form.on('field', function(name, value) {
+//
+//     switch (name) {
+//       case 'visitdata':
+//         visit[name]= value;
+//         break;
+//       case 'files':
+//         filesData.push(value)
+//         break;
+//       default:
+//
+//     }
+//   });
+//
+//   form.on('fileBegin', function(name, file) {
+//
+//   });
+//
+//   form.on('end',async function() {
+//     try {
+//
+//       //insert visitdata
+//       var visitdata = JSON.parse(visit.visitdata)
+//       var visitRecord
+//       var visitFileList = []
+//
+//       if (visitdata.id === null ||visitdata.id === undefined ) {
+//         visitRecord = await models.ClaimInfoVisits.create(visitdata)
+//
+//       } else {
+//         visitRecord = await models.ClaimInfoVisits.findOne({where:{id:visitdata.id}}).then(ClaimInfoVisit => {
+//           delete visitdata['id'];
+//           return ClaimInfoVisit.update(visitdata)
+//         });
+//
+//         models.ClaimInfoVisitsFiles.findAll({where:{visitId:visitdata.id}}).then(ClaimInfoVisitsFiles => {
+//           ClaimInfoVisitsFiles.destroy()
+//         });
+//
+//         for (var i = 0; i < files.length; i++) {
+//           filesData[i].uid
+//           models.ClaimInfoVisitsFiles.findOne({ where: { uid: filesData[i].uid }, paranoid: false }).then(ClaimInfoVisitsFiles => {
+//             ClaimInfoVisitsFiles.restore()
+//           });
+//         }
+//       }
+//
+//       //upload files
+//
+//       for (var i = 0; i < files.length; i++) {
+//
+//         var extension = path.extname(files[i].name).toLowerCase();
+//         var newFileName = visitdata.claimInfoId.replace(/\//g,'_')+'-'+visitdata.visitNumber+'-'+i+extension
+//         fs.rename(files[i].path, form.uploadDir+'/'+newFileName, function(err) {
+//             if (err) next(err);
+//         });
+//
+//         const fileRecord = await models.ClaimInfoVisitsFiles.create({name:newFileName, url: "/upload/claiminfo/" + newFileName, visitId: visitRecord.dataValues.id, active:true}, {raw: true})
+//
+//         visitFileList.push(fileRecord.dataValues)
+//       }
+//       visitRecord.dataValues.visitFileList =  visitFileList
+//
+//
+//
+//       res.send(visitRecord);
+//
+//     }
+//     catch(e) {
+//       console.log(e)
+//       res.sendStatus(500)
+//     }
+//
+//
+//
+//   });
+//
+// })
 
 
 router.post('/insertBillingInfoVisits', awaitErorrHandlerFactory(async (req, res, next) => {
@@ -430,7 +497,7 @@ router.post('/insertBillingInfoVisits', awaitErorrHandlerFactory(async (req, res
 
 router.post('/RCExchangeRate', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
-  console.log('~~~~~~~~~~~~~~~~~~~')
+
   try {
     var claimInfoResult = await models.ClaimInfo.findByPk(req.body.claimID).then((claimInfo) => {
       return models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
@@ -477,75 +544,14 @@ router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) =>
 
 }));
 
-router.get('/getBillingInfos', awaitErorrHandlerFactory(async (req, res, next) => {
-
-  var response = {};
-  console.log('get')
-  console.log(req.body)
-  console.log(req.query)
-  console.log(req.params)
-  console.log(req.data)
-  res.json(response);
-}));
 
 
-router.post('/getBillingInfos', awaitErorrHandlerFactory(async (req, res, next) => {
-
-  var response = {};
-  console.log('post')
-  console.log(req.body)
-  console.log(req.query)
-  console.log(req.params)
-  console.log(req.data)
-  res.json(response);
-}));
-
-router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) => {
-  var form = new formidable.IncomingForm();
-  form.uploadDir = "../upload/documents";
-  form.keepExtensions = true;
-  form.multiples = true;
-  form.parse(req);
-
-  var files = []
-  var data = {}
-  form.on('file', function (name, file){
-    files.push(file)
-  });
-  //https://stackoverflow.com/questions/34264800/node-js-function-return-object-object-instead-of-a-string-value
-  form.on('field', function(name, value) {
-    data[name]= value;
-  });
-
-  form.on('fileBegin', function(name, file) {
-
-  });
-
-  form.on('end',async function() {
-    try {
-
-      if(files.length > 1)
-        throw new Error('file length is longer than 1');
-
-      const fileRecord = await models.DocumentsFiles.create({fileName:files[0].name, path: files[0].path, visitId: data.visitId, active:true})
-      res.send(fileRecord);
-    } catch(e) {
-      console.log(e)
-      res.sendStatus(500)
-    }
-
-    // fs.rename(files[0].path, form.uploadDir+'/'+visit.claimID, function(err) {
-    //     if (err) next(err);
-    // });
-  });
-
-}));
 
 router.post('/insertdocumentsnotes', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
   try {
 
-    const result = await models.DocumentsFiles.findByPk(req.body.path).then((DocumentsFile) => {
+    const result = await models.DocumentsFiles.findByPk(req.body.id).then((DocumentsFile) => {
 
       return DocumentsFile.update({notes:req.body.notes});
     })
@@ -579,7 +585,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
           include: [{
             attributes: ['value'],
             model: models.BillingInfo,
-            // attributes: [ [sequelize.fn('sum', sequelize.col('value')), 'total']],
+
           }],
         }],
         raw: false
@@ -598,20 +604,6 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
-  try {
-    var visitsData = await models.ClaimInfoVisits.findAll({
-      where:{claimInfoId:'RIH/YYYY/XX/11111111-18'},
-      include:{
-        model:models.ClaimInfoVisitsFiles
-      },
-    });
-
-
-    response = {visitsData}
-  } catch(e) {
-    console.log(e)
-    response.error = e;
-  }
   res.json(response);
 }));
 

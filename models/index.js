@@ -9,7 +9,7 @@
 //node_modules/.bin/sequelize model:generate --name BillingInfo --attributes visitId:INTEGER,billingCat:INTEGER,billingSubCat:INTEGER,value:FLOAT
 //node_modules/.bin/sequelize model:generate --name BillingInfoFiles --attributes visitId:INTEGER,name:STRING,url:STRING,active:BOOLEAN,deletedAt:DATE
 //node_modules/.bin/sequelize model:generate --name BillingInfoOtherName --attributes visitId:INTEGER,value:STRING,deletedAt:DATE
-//node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes path:STRING,fileName:STRING,notes:STRING,visitId:INTEGER,active:BOOLEAN
+//node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes visitId:INTEGER,name:STRING,url:STRING,notes:STRING,active:BOOLEAN
 // node_modules/.bin/sequelize model:generate --name BenefitCategories --attributes name:string
 // node_modules/.bin/sequelize model:generate --name BenefitSubCategories --attributes categoryId:INTEGER,name:string
 

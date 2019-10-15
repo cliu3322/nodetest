@@ -2,16 +2,11 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('DocumentsFiles', {
-      path: {
-        type: Sequelize.STRING,
-        primaryKey: true,
+      id: {
         allowNull: false,
-      },
-      fileName: {
-        type: Sequelize.STRING
-      },
-      notes: {
-        type: Sequelize.STRING
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
       },
       visitId: {
         type: Sequelize.INTEGER,
@@ -20,9 +15,17 @@ module.exports = {
           key: 'id'
         }
       },
+      name: {
+        type: Sequelize.STRING
+      },
+      url: {
+        type: Sequelize.STRING
+      },
+      notes: {
+        type: Sequelize.STRING
+      },
       active: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
