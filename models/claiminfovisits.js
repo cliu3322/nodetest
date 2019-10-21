@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const ClaimInfoVisits = sequelize.define('ClaimInfoVisits', {
     claimInfoId: DataTypes.STRING,
     visitNumber: DataTypes.INTEGER,
-    dateOfAdmissionVisit: DataTypes.DATE,
+    dateOfAdmissionVisit: DataTypes.DATEONLY,
     doctorName: DataTypes.STRING,
     hospitalOrClinicCountry: DataTypes.STRING,
     hospitalOrclinicEmail: DataTypes.STRING,

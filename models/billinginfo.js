@@ -11,6 +11,12 @@ module.exports = (sequelize, DataTypes) => {
     BillingInfo.belongsTo(models.ClaimInfoVisits, {
       foreignKey: 'visitId',  targetKey: 'id'
     });
+    BillingInfo.belongsTo(models.BenefitCategories, {
+      foreignKey: 'billingCat', targetKey: 'id'
+    });
+    BillingInfo.belongsTo(models.BenefitSubCategories, {
+      foreignKey: 'billingSubCat', targetKey: 'id'
+    });
   };
   return BillingInfo;
 };

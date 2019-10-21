@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     url: DataTypes.STRING,
     notes: DataTypes.STRING,
-    active: DataTypes.BOOLEAN
+    //active: DataTypes.BOOLEAN
   }, {});
   DocumentsFiles.associate = function(models) {
     // associations can be defined here

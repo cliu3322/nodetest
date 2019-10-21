@@ -8,9 +8,11 @@ var router  = express.Router();
 var models  = require('../models');
 
 var claim = require('./claim');
+var evaluate = require('./evaluate');
 var emailRouter = require('./email');
 var constant = require('./constant');
 var convertor = require('./convertor');
+var ravendb = require('./ravendb');
 var files = require('./files');
 
 var {authenticate, authError} = require('../middleware');
@@ -54,6 +56,7 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	// You can use DB checking here
   try {
 	  const user = await models.User.findOne({ where: {userName: username} });
+
   	if (user === null) {
   		response.error = 'Not found';
   	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
@@ -115,6 +118,9 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
 router.use('/claim', claim);
+
+router.use('/evaluate', evaluate);
+
 router.use('/constant', constant);
 
 router.use('/email',emailRouter);
@@ -122,5 +128,8 @@ router.use('/email',emailRouter);
 router.use('/convertor',convertor)
 
 router.use('/files',files)
+
+router.use('/ravendb',ravendb)
+
 
 module.exports = router;

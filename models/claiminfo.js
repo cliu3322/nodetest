@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     gop: DataTypes.BOOLEAN,
     ibanCodeSortCode: DataTypes.STRING,
     patientAge: DataTypes.INTEGER,
-    patientDob: DataTypes.DATE,
+    patientDob: DataTypes.DATEONLY,
     patientFirstName: DataTypes.STRING,
     patientLastName: DataTypes.STRING,
     policyEmail: DataTypes.STRING,

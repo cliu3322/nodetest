@@ -2,7 +2,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('ClaimInfoVisitsFiles', {
-      uid: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,

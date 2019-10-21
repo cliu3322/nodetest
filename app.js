@@ -46,6 +46,7 @@ app.use('/upload', express.static(path.join(__dirname, '../upload')))
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/*', function(req, res) {
+  console.log('* is triggered')
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 

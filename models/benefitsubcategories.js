@@ -11,9 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'categoryId',  targetKey: 'id'
     });
 
-    BenefitSubCategories.hasOne(models.BillingInfo, {
-      foreignKey: 'billingSubCat',  targetKey: 'id'
-    });
+
   };
   return BenefitSubCategories;
 };
