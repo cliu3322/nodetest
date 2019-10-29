@@ -25,6 +25,9 @@ module.exports = {
       bankAddress: {
         type: Sequelize.STRING
       },
+      bankName: {
+        type: Sequelize.STRING
+      },
       cause: {
         type: Sequelize.STRING
       },
@@ -76,7 +79,7 @@ module.exports = {
       policyLastName: {
         type: Sequelize.STRING
       },
-      policyType: {
+      policyLastType: {
         type: Sequelize.STRING
       },
       policyNumber: {

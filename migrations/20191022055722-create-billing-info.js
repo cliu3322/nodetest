@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('BillingInfoOtherNames', {
+    return queryInterface.createTable('BillingInfos', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -9,17 +9,19 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       visitId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'ClaimInfoVisits',
-          key: 'id'
-        }
+        type: Sequelize.INTEGER
+      },
+      billingCat: {
+        type: Sequelize.INTEGER
+      },
+      billingSubCat: {
+        type: Sequelize.INTEGER
       },
       value: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT
       },
-      deletedAt: {
-        type: Sequelize.DATE
+      approved: {
+        type: Sequelize.FLOAT
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +34,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('BillingInfoOtherNames');
+    return queryInterface.dropTable('BillingInfos');
   }
 };

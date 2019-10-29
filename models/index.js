@@ -1,19 +1,23 @@
 'use strict';
 
-//node_modules/.bin/sequelize model:generate --name User --attributes userName:string,password:string,email:string,firstName:string,lastName:string
-//node_modules/.bin/sequelize model:generate --name ClaimInfo --attributes id:string,createdBy:INTEGER,accountHoldersName:string,bankAccountNumber:string,bankAddress:string,bankName:string,cause:string,contactEmail:string,contactFirstName:string,contactHomeAddress:string,contactLastName:string,contactPhoneNumberCountryCode:string,contactPhoneNumber:string,gop:BOOLEAN,ibanCodeSortCode:string,patientAge:INTEGER,patientDob:DATE,patientFirstName:string,patientLastName:string,policyEmail:string,policyFirstName:string,policyGroupPolicy:BOOLEAN,policyLastName:string,policyLastType:string,policyNumber:string,policyVip:BOOLEAN,reimbusementCurrency:string,relationshipToPatient:string,swift:string
-
-// node_modules/.bin/sequelize model:generate --name ClaimInfoVisits --attributes claimInfoId:STRING,visitNumber:INTEGER,dateOfAdmissionVisit:DATE,doctorName:STRING,hospitalOrClinicCountry:STRING,hospitalOrclinicEmail:STRING,hospitalOrClinicName:STRING,hospitalOrClinicCountryrl:STRING,MedicalDiagnosis:STRING,billingCurrency:STRING,usdper:FLOAT,currencyDate:DATE
-// node_modules/.bin/sequelize model:generate --name ClaimInfoVisitsFiles --attributes uid:INTEGER,visitId:INTEGER,name:STRING,url:STRING,active:BOOLEAN,deletedAt:DATE
-
-//node_modules/.bin/sequelize model:generate --name BillingInfo --attributes visitId:INTEGER,billingCat:INTEGER,billingSubCat:INTEGER,value:FLOAT
-//node_modules/.bin/sequelize model:generate --name BillingInfoFiles --attributes visitId:INTEGER,name:STRING,url:STRING,active:BOOLEAN,deletedAt:DATE
-//node_modules/.bin/sequelize model:generate --name BillingInfoOtherName --attributes visitId:INTEGER,value:STRING,deletedAt:DATE
-//node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes visitId:INTEGER,name:STRING,url:STRING,notes:STRING,active:BOOLEAN
+// node_modules/.bin/sequelize model:generate --name User --attributes userName:string,password:string,email:string,firstName:string,lastName:string
+// node_modules/.bin/sequelize model:generate --name ClaimInfo --attributes id:string,createdBy:INTEGER,accountHoldersName:string,bankAccountNumber:string,bankAddress:string,bankName:string,cause:string,contactEmail:string,contactFirstName:string,contactHomeAddress:string,contactLastName:string,contactPhoneNumberCountryCode:string,contactPhoneNumber:string,gop:BOOLEAN,ibanCodeSortCode:string,patientAge:INTEGER,patientDob:DATE,patientFirstName:string,patientLastName:string,policyEmail:string,policyFirstName:string,policyGroupPolicy:BOOLEAN,policyLastName:string,policyLastType:string,policyNumber:string,policyVip:BOOLEAN,reimbusementCurrency:string,relationshipToPatient:string,swift:string,status:string,RCExchangeRate:FLOAT,RCExchangeRateDate:DATE
+//
+// node_modules/.bin/sequelize model:generate --name ClaimInfoVisits --attributes claimInfoId:STRING,visitNumber:INTEGER,dateOfAdmissionVisit:DATE,doctorName:STRING,hospitalOrClinicCountry:STRING,hospitalOrclinicEmail:STRING,hospitalOrClinicName:STRING,hospitalOrClinicCountryrl:STRING,MedicalDiagnosis:STRING,billingCurrency:STRING,billingRate:FLOAT,currencyDate:DATE
+// node_modules/.bin/sequelize model:generate --name ClaimInfoVisitsFiles --attributes visitId:INTEGER,name:STRING,url:STRING
+//
+// node_modules/.bin/sequelize model:generate --name BillingInfo --attributes visitId:INTEGER,billingCat:INTEGER,billingSubCat:INTEGER,value:FLOAT,approved:FLOAT
+// node_modules/.bin/sequelize model:generate --name BillingInfoFiles --attributes visitId:INTEGER,name:STRING,url:STRING
+// node_modules/.bin/sequelize model:generate --name BillingInfoOtherName --attributes visitId:INTEGER,value:STRING
+// node_modules/.bin/sequelize model:generate --name DocumentsFiles --attributes visitId:INTEGER,name:STRING,url:STRING,notes:STRING
 // node_modules/.bin/sequelize model:generate --name BenefitCategories --attributes name:string
 // node_modules/.bin/sequelize model:generate --name BenefitSubCategories --attributes categoryId:INTEGER,name:string
+//
+// node_modules/.bin/sequelize model:generate --name ExchangeRate --attributes code:STRING,name:STRING,rate:FLOAT,date:DATE
+//
+// node_modules/.bin/sequelize model:generate --name Acessment --attributes claimInfoId:STRING,forPreExisting:BOOLEAN,relatePreExisting:BOOLEAN,otherExclusion:BOOLEAN,reasonable:BOOLEAN,adhere:BOOLEAN
+// node_modules/.bin/sequelize model:generate --name Comments --attributes claimInfoId:STRING,group:string,message:STRING,createdBy:INTEGER,parent:INTEGER,adhere:BOOLEAN
 
-//node_modules/.bin/sequelize model:generate --name ExchangeRate --attributes code:STRING,name:STRING,perUSD:FLOAT,USDper:FLOAT,date:DATE
 
 //node_modules/.bin/sequelize db:migrate --env development
 //node_modules/.bin/sequelize db:migrate --env azure

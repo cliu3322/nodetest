@@ -2,10 +2,10 @@
 module.exports = (sequelize, DataTypes) => {
   const BillingInfoOtherName = sequelize.define('BillingInfoOtherName', {
     visitId: DataTypes.INTEGER,
-    value: DataTypes.STRING
+    value: DataTypes.STRING,
+    deletedAt: DataTypes.DATE
   }, {});
   BillingInfoOtherName.associate = function(models) {
-    // associations can be defined here
     BillingInfoOtherName.belongsTo(models.ClaimInfoVisits, {
       foreignKey: 'visitId',  targetKey: 'id'
     });

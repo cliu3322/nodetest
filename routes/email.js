@@ -95,7 +95,6 @@ async function sendhtml(html) {
 
 
 async function main() {
-  console.log('triggered')
     MailConfig.ViewOption(gmailTransport,hbs);
 
 

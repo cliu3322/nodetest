@@ -20,34 +20,31 @@ module.exports = (sequelize, DataTypes) => {
     gop: DataTypes.BOOLEAN,
     ibanCodeSortCode: DataTypes.STRING,
     patientAge: DataTypes.INTEGER,
-    patientDob: DataTypes.DATE,
+    patientDob: DataTypes.DATEONLY,
     patientFirstName: DataTypes.STRING,
     patientLastName: DataTypes.STRING,
     policyEmail: DataTypes.STRING,
     policyFirstName: DataTypes.STRING,
     policyGroupPolicy: DataTypes.BOOLEAN,
     policyLastName: DataTypes.STRING,
-    policyLastType: DataTypes.STRING,
+    policyType: DataTypes.STRING,
     policyNumber: DataTypes.STRING,
     policyVip: DataTypes.BOOLEAN,
     reimbusementCurrency: DataTypes.STRING,
     relationshipToPatient: DataTypes.STRING,
     swift: DataTypes.STRING,
-    RCExchangeRate:DataTypes.FLOAT,
-    RCExchangeRateDate:DataTypes.DATE,
-    status: DataTypes.STRING,
+    RCExchangeRate: DataTypes.FLOAT,
+    RCExchangeRateDate: DataTypes.DATE,
+    status:DataTypes.STRING,
+    decisioner:DataTypes.STRING,
+    decisionDate:DataTypes.DATE,
+    note:DataTypes.STRING,
   }, {});
   ClaimInfo.associate = function(models) {
     // associations can be defined here
     ClaimInfo.hasMany(models.ClaimInfoVisits,
-      {  foreignKey: 'claimInfoId',  targetKey: 'id'}
-    )
-    ClaimInfo.hasOne(models.Acessment,
-      {  foreignKey: 'claimInfoId',  targetKey: 'id'}
-    )
-    ClaimInfo.hasMany(models.Comments,
-      {  foreignKey: 'claimInfoId',  targetKey: 'id'}
-    )
+       {  foreignKey: 'claimInfoId',  targetKey: 'id'}
+     )
   };
   return ClaimInfo;
 };

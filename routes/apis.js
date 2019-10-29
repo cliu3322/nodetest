@@ -12,6 +12,7 @@ var evaluate = require('./evaluate');
 var emailRouter = require('./email');
 var constant = require('./constant');
 var convertor = require('./convertor');
+var comments = require('./comments');
 var ravendb = require('./ravendb');
 var files = require('./files');
 
@@ -130,6 +131,8 @@ router.use('/convertor',convertor)
 router.use('/files',files)
 
 router.use('/ravendb',ravendb)
+
+router.use('/comments',comments)
 
 
 module.exports = router;

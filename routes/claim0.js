@@ -312,7 +312,7 @@ router.post('/updateBillingCurrency', awaitErorrHandlerFactory( (req, res, next)
       return visit.update({
         billingCurrency:req.body.billingCurrency,
         currencyDate:req.body.currencyDate,
-        billingUsdper:req.body.billingUsdper
+        billingRate:req.body.billingRate
       })
     } else {
       return null
@@ -581,7 +581,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
         attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt'],
         include: [{
           model:models.ClaimInfoVisits,
-          attributes: ['id', 'billingUsdper'],
+          attributes: ['id', 'billingRate'],
           include: [{
             attributes: ['value'],
             model: models.BillingInfo,

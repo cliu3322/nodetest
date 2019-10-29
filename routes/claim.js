@@ -12,6 +12,8 @@ var fs = require('fs');
 var path = require('path');
 var d3 = require('d3-array');
 const sequelize = require('sequelize');
+var Promise = require("bluebird");
+var base64url = require('base64url');
 //router.use(fileUpload());
 //middleware to hanlde errors
 const awaitErorrHandlerFactory = middleware => {
@@ -95,6 +97,61 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
+router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
+  var response = {};
+  try {
+    const claimID = base64url.decode(req.query.id)
+    console.log(claimID)
+    const claim = await models.ClaimInfo.findByPk(claimID, {
+
+      include: [{
+        model:models.ClaimInfoVisits,
+        //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
+        include: [
+          {
+            model: models.ClaimInfoVisitsFiles
+          },
+          {
+            model: models.BillingInfoFiles,
+          },
+          {
+            model: models.DocumentsFiles
+          },
+          {
+            model: models.BillingInfo,
+            include: [
+              {
+                model:models.BenefitCategories,
+              },
+              {
+                model:models.BenefitSubCategories,
+              }
+            ]
+          },
+
+        ],
+      }],
+    })
+    res.json(claim);
+  } catch(e) {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  }
+}));
+
+router.get('/claimTitle', awaitErorrHandlerFactory(async (req, res, next) => {
+  var response = {};
+  try {
+    const claimID = base64url.decode(req.query.id)
+    const claim = await models.ClaimInfo.findByPk(claimID, {
+      attributes: ['id', 'patientFirstName','patientLastName']
+    })
+    res.json(claim);
+  } catch(e) {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  }
+}));
 
 router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
@@ -110,6 +167,8 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
         } else {
           const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
           claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
+          claimInfo.status='pr'
+          console.log(claimInfo)
           claim = await models.ClaimInfo.create(claimInfo)
         }
         return claim
@@ -126,8 +185,7 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
 
 }));
 
-router.post('/addClaimVisit', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.body)
+router.post('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
   models.ClaimInfoVisits.create(req.body, {
         include: [{
           model: models.ClaimInfoVisitsFiles,
@@ -140,41 +198,115 @@ router.post('/addClaimVisit', awaitErorrHandlerFactory(async (req, res, next) =>
   })
 }));
 
-router.get('/getClaimById', awaitErorrHandlerFactory(async (req, res, next) => {
-  var response = {};
-  try {
-    var ClaimInfo = await models.ClaimInfo.findOne(
-      {
-        where:{id:req.query.claimID},
-        include: [{
-          model:models.ClaimInfoVisits,
-          //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
-          include: [{model: models.ClaimInfoVisitsFiles}, {model: models.BillingInfoFiles}, {model: models.BillingInfo}, {model: models.DocumentsFiles},],
-        }],
-      }
-    );
-    res.json(ClaimInfo);
+router.put('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
+  //console.log(req.query)
+  if(req.query.dateOfAdmissionVisit)
+    req.query.dateOfAdmissionVisit = req.query.dateOfAdmissionVisit.replace(/"/g,'')
+  var ClaimInfoVisitsFiles =[]
+  if(req.query.ClaimInfoVisitsFiles) {
+    if(req.query.ClaimInfoVisitsFiles.length === 1){
 
-  } catch(e) {
-    console.log(e)
-    res.sendStatus(500).send(e)
+      ClaimInfoVisitsFiles.push(JSON.parse(req.query.ClaimInfoVisitsFiles))
+      ClaimInfoVisitsFiles[0].visitId = req.query.id
+    }
+    else {
+      ClaimInfoVisitsFiles = req.query.ClaimInfoVisitsFiles.map(file => {
+        file = JSON.parse(file)
+        file.visitId =  req.query.id
+        return file
+      })
+    }
+
   }
 
+  req.query.ClaimInfoVisitsFiles = ClaimInfoVisitsFiles
+
+
+  models.ClaimInfoVisits.findByPk(req.query.id, {
+    include: [{
+      model: models.ClaimInfoVisitsFiles,
+    }],
+  }).then(visit => {
+    visit.update(req.query).then(visit => {
+      models.ClaimInfoVisitsFiles.bulkCreate(req.query.ClaimInfoVisitsFiles).then(ClaimInfoVisitsFile => {
+        models.ClaimInfoVisits.findByPk(req.query.id, {
+          include: [{
+            model: models.ClaimInfoVisitsFiles,
+          }],
+        }).then(newvisit => {
+          console.log(newvisit)
+          res.send(newvisit)
+        })
+      })
+
+    })
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+  // models.ClaimInfoVisits.findByPk(req.query.id, {
+  //   include: [{
+  //     model: models.ClaimInfoVisitsFiles,
+  //   }],
+  // }).then(visit => {
+  //   visit.update(req.query,{
+  //     include: [{
+  //       model: models.ClaimInfoVisitsFiles,
+  //     }],
+  //   }).then(visit => {
+  //     res.send(visit)
+  //   })
+  // }).catch( e => {
+  //   console.log(e)
+  //   res.sendStatus(500).send(e)
+  // })
+}));
+
+router.delete('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log(req.query.id)
+  models.ClaimInfoVisits.findByPk(req.query.id).then(visit => {
+    if(visit) {
+      console.log(visit)
+      return visit.destroy()
+    }
+    else {
+      return {err:'no such record'}
+    }
+  }).then(result => res.send(result)).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+}));
+
+
+router.delete('/claimInfoVisitsFile', awaitErorrHandlerFactory(async (req, res, next) => {
+  models.ClaimInfoVisitsFiles.findByPk(req.query.id).then(file => {
+    if(file)
+      return file.destroy()
+    else {
+      return {err:'no such record'}
+    }
+  }).then(result => res.send(result)).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 }));
 
 router.post('/updateReimbusementCurrency', awaitErorrHandlerFactory(async (req, res, next) => {
   const response = {};
-console.log(req.body)
+
   var claimInfo =  req.body
   //console.log(claimInfo)
   if (claimInfo.id){
 
     try {
       models.ClaimInfo.findByPk(claimInfo.id).then(claimInfo => {
+        console.log(claimInfo)
         models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+          console.log(exchangeRate)
           if(exchangeRate){
             claimInfo.update({
-              RCExchangeRate: exchangeRate.perUSD,
+              RCExchangeRate: exchangeRate.rate,
               RCExchangeRateDate:exchangeRate.updatedAt
             }).then(result => {
               res.send(claimInfo)
@@ -199,26 +331,43 @@ router.post('/uploadBillingInfo', awaitErorrHandlerFactory( (req, res, next) => 
 //     value:req.body.value
   console.log(req.body)
   console.log('adsfadfsd')
-  models.BillingInfo.findOne({
-    where:{
-      visitId:req.body.visitId,
-      billingCat:req.body.billingCat,
-      billingSubCat:req.body.billingSubCat
-    }
-  }).then(billing => {
-    if (billing) {
-      return billing.update({
-        value:req.body.value
-      })
-    } else {
-      return models.BillingInfo.create(req.body)
-    }
-  }).then(result => {
-    res.send(result)
-  }).catch (e => {
-    console.log(e)
-    res.sendStatus(500).send(e)
-  })
+  if(req.body.id) {
+    models.BillingInfo.findByPk(req.body.id).then(billing => {
+      if (billing) {
+        return billing.update(req.body)
+      } else {
+        return models.BillingInfo.create(req.body)
+      }
+    }).then(result => {
+      res.send(result)
+    }).catch (e => {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    })
+  } else {
+    models.BillingInfo.findOne({
+      where:{
+        visitId:req.body.visitId,
+        billingCat:req.body.billingCat,
+        billingSubCat:req.body.billingSubCat
+      }
+    }).then(billing => {
+      if (billing) {
+        return billing.update({
+          value:req.body.value
+        })
+      } else {
+        return models.BillingInfo.create(req.body)
+      }
+    }).then(result => {
+      res.send(result)
+    }).catch (e => {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    })
+  }
+
+
 
 
 }));
@@ -235,7 +384,7 @@ router.post('/updateBillingCurrency', awaitErorrHandlerFactory( (req, res, next)
       return visit.update({
         billingCurrency:req.body.billingCurrency,
         currencyDate:req.body.currencyDate,
-        billingUsdper:req.body.billingUsdper
+        billingRate:req.body.billingUsdper
       })
     } else {
       return null
@@ -310,9 +459,6 @@ router.post('/insertdocumentsnotes', awaitErorrHandlerFactory(async (req, res, n
   res.json(response);
 }));
 
-
-
-
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   var response = {};
@@ -325,7 +471,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
         attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt'],
         include: [{
           model:models.ClaimInfoVisits,
-          attributes: ['id', 'billingUsdper'],
+          attributes: ['id', 'billingRate'],
           include: [{
             attributes: ['value'],
             model: models.BillingInfo,
@@ -344,11 +490,32 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-
-
 router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   res.json(response);
+}));
+
+router.put('/rate', awaitErorrHandlerFactory(async (req, res, next) => {
+  models.ClaimInfo.findByPk(req.query.id, {include: {model: models.ClaimInfoVisits}}).then(claimInfo => {
+    //console.log(claimInfo.ClaimInfoVisits.update)
+    models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
+      if (exchangeRate === null)
+        res.sendStatus(500).send({err:'no reimbusement Currency'})
+      claimInfo.update({ RCExchangeRate: exchangeRate.rate, RCExchangeRateDate:exchangeRate.updatedAt}).then(chaimInfo => {
+        Promise.each(claimInfo.ClaimInfoVisits,
+          (visit) => {
+            console.log('1')
+            return models.ExchangeRate.findByPk(visit.billingCurrency).then(async exchangeRate => {
+              return await visit.update({ billingRate: exchangeRate.rate, currencyDate:exchangeRate.updatedAt})
+            })
+          }
+        )
+        .then(result => { res.send(chaimInfo)})
+      })
+    })
+
+
+  }).catch(e => {console.log(e)})
 }));
 
 

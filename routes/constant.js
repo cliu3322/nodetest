@@ -213,7 +213,7 @@ router.get('/rejected', async function(req, res, next) {
                 hospitalOrClinicCountry: item.hospitalLocation,
                 billingCurrency: parsedBillingResult,
                 createdAt: item.createdAt,
-                billingUsdper: isNaN(item.billingTotalUSD/item.claimedTotalUSD)?null:item.billingTotalUSD/item.claimedTotalUSD,
+                billingRate: isNaN(item.billingTotalUSD/item.claimedTotalUSD)?null:item.billingTotalUSD/item.claimedTotalUSD,
                 BillingInfos : billingInfos
               }]
             }
@@ -471,7 +471,7 @@ router.get('/approved', async function(req, res, next) {
                  hospitalOrClinicCountry: item.hospitalLocation,
                  billingCurrency: parsedBillingResult,
                  createdAt: item.createdAt,
-                 billingUsdper: billingUsdper,
+                 billingRate: billingUsdper,
                  BillingInfos : billingInfos
                }]
              }

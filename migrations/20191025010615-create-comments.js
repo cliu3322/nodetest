@@ -1,24 +1,30 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('ExchangeRates', {
-      code: {
+    return queryInterface.createTable('Comments', {
+      id: {
         allowNull: false,
-        autoIncrement: false,
+        autoIncrement: true,
         primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      claimInfoId: {
         type: Sequelize.STRING
       },
-      name: {
+      group: {
         type: Sequelize.STRING
       },
-      perUSD: {
-        type: Sequelize.FLOAT
+      message: {
+        type: Sequelize.STRING
       },
-      USDper: {
-        type: Sequelize.FLOAT
+      createdBy: {
+        type: Sequelize.INTEGER
       },
-      date: {
-        type: Sequelize.DATE
+      parent: {
+        type: Sequelize.INTEGER
+      },
+      adhere: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -31,6 +37,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('ExchangeRates');
+    return queryInterface.dropTable('Comments');
   }
 };

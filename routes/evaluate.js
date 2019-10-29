@@ -14,7 +14,7 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.get('/getBasic',async function(req, res, next) {
+router.get('/assessment',async function(req, res, next) {
   const claimID = base64url.decode(req.query.id)
   //retrieve policy: Approved YTD, policy Type
   //from Regency WT: Isured person, Previous, Start Date
@@ -22,54 +22,41 @@ router.get('/getBasic',async function(req, res, next) {
 
 
   //retrieve claim, we don't have gender
-  const claim = await models.ClaimInfo.findByPk(claimID, {
+  console.log(claimID)
+  const assessment = await models.Acessment.findByPk(claimID, {attributes: ['adhere', 'forPreExisting','otherExclusion','reasonable','relatePreExisting']})
+  console.log('assessment', assessment)
 
-    include: [{
-      model:models.ClaimInfoVisits,
-      //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
-      include: [
-        {
-          model: models.ClaimInfoVisitsFiles
-        },
-        {
-          model: models.BillingInfoFiles,
-        },
-        {
-          model: models.DocumentsFiles
-        },
-        {
-          model: models.BillingInfo,
-          include: [
-            {
-              model:models.BenefitCategories,
-            },
-            {
-              model:models.BenefitSubCategories,
-            }
-          ]
-        },
 
-      ],
-    }],
-  })
-  const patientClaims = await models.ClaimInfo.findAll({
-    where: {patientFirstName:claim.patientFirstName, patientLastName:claim.patientLastName, patientDob:claim.patientDob },
-    attributes: ['id', 'createdAt', 'cause'],
-    include: [{
-      model:models.ClaimInfoVisits,
-      attributes: ['billingUsdper'],
-      include: [
-        {
-          model: models.BillingInfo
-        },
-      ],
-    }],
 
-  })
-
-  res.send({claim, patientClaims})
-
+  const evaluate = await models.Comments.findOne({
+    where: {
+      claimInfoId:claimID,
+      group:'evaluate'
+    },
+    order: [ [ 'createdAt', 'DESC' ]]
+  }).then(evaluate => evaluate);
+  res.send({assessment, evaluate})
   //retrieve patient, we should build patient db in the future
+
+});
+
+router.post('/assessment',async function(req, res, next) {
+
+  var comment = {claimInfoId:req.body.data.claimInfoId, createdBy:req.body.data.createdBy, group:'evaluate', message:req.body.data.rationale}
+  models.Comments.create(comment).then(comment => {
+    models.Acessment.findByPk(req.body.data.claimInfoId).then(assessment => {
+      if(assessment) {
+        assessment.update(req.body.data)
+      } else {
+        models.Acessment.create(req.body.data)
+      }
+    })
+    res.json(comment);
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
 
 });
 

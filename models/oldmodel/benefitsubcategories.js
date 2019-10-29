@@ -6,9 +6,12 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   BenefitSubCategories.associate = function(models) {
     // associations can be defined here
+
     BenefitSubCategories.belongsTo(models.BenefitCategories, {
       foreignKey: 'categoryId',  targetKey: 'id'
     });
+
+
   };
   return BenefitSubCategories;
 };

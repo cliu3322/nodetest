@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true
     },
     name: DataTypes.STRING,
-    rate: DataTypes.FLOAT,
+    perUSD: DataTypes.FLOAT,
+    USDper: DataTypes.FLOAT,
     date: DataTypes.DATE
   }, {});
   ExchangeRate.associate = function(models) {

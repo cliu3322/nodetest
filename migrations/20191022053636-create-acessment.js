@@ -1,31 +1,31 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('BillingInfoFiles', {
-      id: {
+    return queryInterface.createTable('Acessments', {
+      claimInfoId: {
         allowNull: false,
-        autoIncrement: true,
+        autoIncrement: false,
         primaryKey: true,
-        type: Sequelize.INTEGER
-      },
-      visitId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         references: {
-          model: 'ClaimInfoVisits',
+          model: 'ClaimInfos',
           key: 'id'
         }
       },
-      name: {
-        type: Sequelize.STRING
-      },
-      url: {
-        type: Sequelize.STRING
-      },
-      active: {
+      forPreExisting: {
         type: Sequelize.BOOLEAN
       },
-      deletedAt: {
-        type: Sequelize.DATE
+      relatePreExisting: {
+        type: Sequelize.BOOLEAN
+      },
+      otherExclusion: {
+        type: Sequelize.BOOLEAN
+      },
+      reasonable: {
+        type: Sequelize.BOOLEAN
+      },
+      adhere: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -38,6 +38,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('BillingInfoFiles');
+    return queryInterface.dropTable('Acessments');
   }
 };

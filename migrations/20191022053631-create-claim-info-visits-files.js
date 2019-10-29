@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('DocumentsFiles', {
+    return queryInterface.createTable('ClaimInfoVisitsFiles', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -21,12 +21,6 @@ module.exports = {
       url: {
         type: Sequelize.STRING
       },
-      notes: {
-        type: Sequelize.STRING
-      },
-      active: {
-        type: Sequelize.BOOLEAN
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -38,6 +32,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('DocumentsFiles');
+    return queryInterface.dropTable('ClaimInfoVisitsFiles');
   }
 };
