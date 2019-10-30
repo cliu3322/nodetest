@@ -97,6 +97,34 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
+router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log(req.query)
+  var response = {};
+  try {
+      var claims = await models.ClaimInfo.findAll({
+        attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
+        where: req.query,
+        include: [{
+          model:models.ClaimInfoVisits,
+          attributes: ['id', 'billingRate'],
+          include: [{
+            attributes: ['value'],
+            model: models.BillingInfo,
+
+          }],
+        }],
+        raw: false
+      });
+
+
+      response = claims
+  } catch(e) {
+    console.log(e)
+    response.error = e;
+  }
+  res.json(response);
+}));
+
 router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
@@ -244,22 +272,7 @@ router.put('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
     console.log(e)
     res.sendStatus(500).send(e)
   })
-  // models.ClaimInfoVisits.findByPk(req.query.id, {
-  //   include: [{
-  //     model: models.ClaimInfoVisitsFiles,
-  //   }],
-  // }).then(visit => {
-  //   visit.update(req.query,{
-  //     include: [{
-  //       model: models.ClaimInfoVisitsFiles,
-  //     }],
-  //   }).then(visit => {
-  //     res.send(visit)
-  //   })
-  // }).catch( e => {
-  //   console.log(e)
-  //   res.sendStatus(500).send(e)
-  // })
+
 }));
 
 router.delete('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
@@ -368,7 +381,21 @@ router.post('/uploadBillingInfo', awaitErorrHandlerFactory( (req, res, next) => 
   }
 
 
+}));
 
+router.put('/billingInfo', awaitErorrHandlerFactory( (req, res, next) => {
+//     value:req.body.value
+  models.BillingInfo.findByPk(req.query.id).then(billingInfo => {
+
+    billingInfo.update(req.query).then(newBillingInfo => {
+      res.send(newBillingInfo)
+    }).catch( e => {
+      throw e
+    })
+  }).catch( e => {
+    console.log('this is some error',e)
+    res.sendStatus(500).send(e)
+  })
 
 }));
 
@@ -410,6 +437,20 @@ router.post('/insertBillingInfoFiles', awaitErorrHandlerFactory( (req, res, next
 
 
 }));
+
+router.delete('/billingInfoFiles', awaitErorrHandlerFactory(async (req, res, next) => {
+  models.BillingInfoFiles.findByPk(req.query.id).then(file => {
+    if(file)
+      return file.destroy()
+    else {
+      return {err:'no such record'}
+    }
+  }).then(result => res.send(result)).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+}));
+
 
 router.post('/uploadBillingInfoOtherName', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
@@ -459,6 +500,19 @@ router.post('/insertdocumentsnotes', awaitErorrHandlerFactory(async (req, res, n
   res.json(response);
 }));
 
+router.delete('/documentsFiles', awaitErorrHandlerFactory(async (req, res, next) => {
+  models.DocumentsFiles.findByPk(req.query.id).then(file => {
+    if(file)
+      return file.destroy()
+    else {
+      return {err:'no such record'}
+    }
+  }).then(result => res.send(result)).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+}));
+
 router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   var response = {};
@@ -468,7 +522,7 @@ router.get('/allClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 
 
       var claims = await models.ClaimInfo.findAll({
-        attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt'],
+        attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
         include: [{
           model:models.ClaimInfoVisits,
           attributes: ['id', 'billingRate'],

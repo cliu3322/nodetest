@@ -9,7 +9,7 @@ var humanname  = require('humanname');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  console.log(req.query.url)
+  console.log(req.query)
   res.download(req.query.url);
 });
 

@@ -16,13 +16,17 @@ router.get('/', function(req, res, next) {
 
 
 router.get('/comments',async function(req, res, next) {
-  const claimID = base64url.decode(req.query.id)
+  //const claimID = base64url.decode(req.query.id)
+  const claimID = req.query.id
   console.log(claimID)
   //retrieve policy: Approved YTD, policy Type
   //from Regency WT: Isured person, Previous, Start Date
   //? Approved YTD, Gross premium, Payment Frequency
 
-  models.Comments.findAll({where:{claimInfoId:claimID}}).then(comments => {
+  models.Comments.findAll({
+    where:{claimInfoId:claimID},
+    order: [['createdAt', 'DESC']],
+  }).then(comments => {
 
     res.json(comments);
   }).catch( e => {
@@ -38,7 +42,6 @@ router.get('/comments',async function(req, res, next) {
 router.post('/comments',async function(req, res, next) {
   // const claimID = base64url.decode(req.query.id)
 
-  req.body.claimInfoId = base64url.decode(req.body.claimInfoId)
   models.Comments.create(req.body).then(comment => {
 
     res.json(comment);

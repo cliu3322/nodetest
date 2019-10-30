@@ -61,4 +61,35 @@ router.post('/assessment',async function(req, res, next) {
 });
 
 
+router.get('/patientClaims', function(req, res, next) {
+  const claimID = base64url.decode(req.query.id)
+
+  console.log(claimID)
+  models.ClaimInfo.findByPk(claimID, {attributes: ['patientFirstName', 'patientLastName','patientDob']}).then(claim => {
+    models.ClaimInfo.findAll({
+      where: {
+        patientFirstName: claim.patientFirstName,
+        patientLastName: claim.patientLastName,
+        patientDob:claim.patientDob
+      },
+      attributes: ['id', 'createdAt','cause'],
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'billingRate',],
+        include: [
+          {
+            model: models.BillingInfo,
+          },
+        ],
+      }],
+    }).then(patientClaims => {
+      res.send(patientClaims)
+    })
+  })
+
+
+  //retrieve patient, we should build patient db in the future
+
+});
+
 module.exports = router;
