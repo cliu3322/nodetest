@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     policyFirstName: DataTypes.STRING,
     policyGroupPolicy: DataTypes.BOOLEAN,
     policyLastName: DataTypes.STRING,
-    policyLastType: DataTypes.STRING,
+    policyType: DataTypes.STRING,
     policyNumber: DataTypes.STRING,
     policyVip: DataTypes.BOOLEAN,
     reimbusementCurrency: DataTypes.STRING,

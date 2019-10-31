@@ -79,7 +79,7 @@ module.exports = {
       policyLastName: {
         type: Sequelize.STRING
       },
-      policyLastType: {
+      policyType: {
         type: Sequelize.STRING
       },
       policyNumber: {
