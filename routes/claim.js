@@ -98,26 +98,35 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 }));
 
 router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.query)
   var response = {};
   try {
-      var claims = await models.ClaimInfo.findAll({
-        attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
-        where: req.query,
+    var query = req.query
+    if(req.query.or) {
+      var newQuery = req.query.or.map(function(item) {
+        return JSON.parse(item)
+      })
+      console.log(newQuery)
+      req.query = {[sequelize.Op.or]:newQuery}
+    }
+    console.log(req.query)
+
+    var claims = await models.ClaimInfo.findAll({
+      attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
+      where: req.query,
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'billingRate'],
         include: [{
-          model:models.ClaimInfoVisits,
-          attributes: ['id', 'billingRate'],
-          include: [{
-            attributes: ['value'],
-            model: models.BillingInfo,
+          attributes: ['value'],
+          model: models.BillingInfo,
 
-          }],
         }],
-        raw: false
-      });
+      }],
+      raw: false
+    });
 
 
-      response = claims
+    response = claims
   } catch(e) {
     console.log(e)
     response.error = e;
@@ -128,8 +137,10 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
+    console.log('req.query.id',req.query.id)
     const claimID = base64url.decode(req.query.id)
     console.log(claimID)
+    console.log('1111111111111111111111111111111111111111111111111')
     const claim = await models.ClaimInfo.findByPk(claimID, {
 
       include: [{

@@ -22,11 +22,8 @@ router.get('/assessment',async function(req, res, next) {
 
 
   //retrieve claim, we don't have gender
-  console.log(claimID)
+
   const assessment = await models.Acessment.findByPk(claimID, {attributes: ['adhere', 'forPreExisting','otherExclusion','reasonable','relatePreExisting']})
-  console.log('assessment', assessment)
-
-
 
   const evaluate = await models.Comments.findOne({
     where: {
@@ -35,31 +32,27 @@ router.get('/assessment',async function(req, res, next) {
     },
     order: [ [ 'createdAt', 'DESC' ]]
   }).then(evaluate => evaluate);
-  res.send({assessment, evaluate})
+  res.send({assessment ,evaluate})
   //retrieve patient, we should build patient db in the future
 
 });
 
 router.post('/assessment',async function(req, res, next) {
-
+  console.log(req.body.data)
   var comment = {claimInfoId:req.body.data.claimInfoId, createdBy:req.body.data.createdBy, group:'evaluate', message:req.body.data.rationale}
-  models.Comments.create(comment).then(comment => {
-    models.Acessment.findByPk(req.body.data.claimInfoId).then(assessment => {
-      if(assessment) {
-        assessment.update(req.body.data)
-      } else {
-        models.Acessment.create(req.body.data)
-      }
-    })
-    res.json(comment);
-  }).catch( e => {
-    console.log(e)
-    res.sendStatus(500).send(e)
+  const commentResult = await models.Comments.create(comment)
+  const assessmentResult = await  models.Acessment.findByPk(req.body.data.claimInfoId).then(assessment => {
+    if(assessment) {
+      return assessment.update(req.body.data)
+    } else {
+      return models.Acessment.create(req.body.data)
+    }
   })
-
-
+  const claimResult = await models.ClaimInfo.findByPk(req.body.data.claimInfoId).then(item => {
+    return item.update({ status: 'pd'})
+  })
+  res.send({commentResult,assessmentResult ,claimResult})
 });
-
 
 router.get('/patientClaims', function(req, res, next) {
   const claimID = base64url.decode(req.query.id)
@@ -91,5 +84,22 @@ router.get('/patientClaims', function(req, res, next) {
   //retrieve patient, we should build patient db in the future
 
 });
+
+router.post('/decision', function(req, res, next) {
+  // const claimID = base64url.decode(req.query.id)
+  console.log(req.body)
+  models.Comments.create(req.body.decision).then(comment => {
+    models.ClaimInfo.findByPk(req.body.decision.claimInfoId).then(item => {
+      return item.update(req.body.status)
+    })
+    res.json(comment);
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+});
+
 
 module.exports = router;
