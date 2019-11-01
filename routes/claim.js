@@ -134,6 +134,37 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
+router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  var claim = req.body
+  models.ClaimInfo.count({policyNumber:claim.policyNumber}).then(policyCount => {
+    claim.id = claim.policyNumber+"-"+(policyCount+1)
+    claim.status='pr'
+    models.ClaimInfo.create(claim).then(result => {
+      res.send(result)
+    }).catch(e => {throw e})
+  }).catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+}));
+
+router.put('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  console.log(req.body)
+  models.ClaimInfo.findByPk(req.body.id).then(async ClaimInfo => {
+    ClaimInfo.update(req.body).then(result => {
+      res.send(result)
+    })
+    .catch (e => {
+      throw e
+    })
+  })
+
+}));
+
 router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
