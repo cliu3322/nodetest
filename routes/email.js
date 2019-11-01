@@ -38,6 +38,31 @@ router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
   res.send(result)
 }))
 
+router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
+  MailConfig.ViewOption(gmailTransport,hbs);
+  var email = {
+    from: 'liuchunyi1987@hotmail.com', // sender address
+    to: 'cliu3322@hawaii.edu'+','+req.body.contactEmail, // list of receivers
+    subject: 'Hello ✔', // Subject line
+    template: 'threecolumns',
+    context: {
+      name:req.body.policyFirstName + ' ' + req.body.policyLastName,
+      email: "tariqul.islam.rony@gmail.com",
+      address: "52, Kadamtola Shubag dhaka"
+    },
+    attachments: [{
+        filename: 'a.png',
+        path: __dirname +'/../views/img/a.png',
+        cid: 'unique@nodemailer.com' //same cid value as in the html img src
+    }]
+  }
+  console.log(email)
+  gmailTransport.sendMail(email).then(result => {
+    res.send(result)
+  });
+}))
+
+
 
 router.post('/sendhtml', awaitErorrHandlerFactory(async (req, res, next) => {
 
@@ -52,7 +77,7 @@ async function sendhtml(html) {
     try {
       var info = await gmailTransport.sendMail({
         from: 'liuchunyi1987@hotmail.com', // sender address
-        to: 'eric.sqlserver@gmail.com, cwhite@welcometoalliance.com', // list of receivers
+        to: 'eric.sqlserver@gmail.com', // list of receivers
         subject: 'Hello ✔', // Subject line
         html: html,
         context: {
@@ -69,7 +94,7 @@ async function sendhtml(html) {
 
       await gmailTransport.sendMail({
         from: 'liuchunyi1987@hotmail.com', // sender address
-        to: 'eric.sqlserver@gmail.com, cwhite@welcometoalliance.com', // list of receivers
+        to: 'eric.sqlserver@gmail.com', // list of receivers
         subject: 'Hello ✔', // Subject line
         template: 'test',
         context: {
