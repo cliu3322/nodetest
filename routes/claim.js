@@ -97,7 +97,7 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
-router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
     var query = req.query
@@ -134,44 +134,51 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 
-  var claim = req.body
-  models.ClaimInfo.count({policyNumber:claim.policyNumber}).then(policyCount => {
-    claim.id = claim.policyNumber+"-"+(policyCount+1)
-    claim.status='pr'
-    models.ClaimInfo.create(claim).then(result => {
-      res.send(result)
-    }).catch(e => {throw e})
+router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+  const claimID = base64url.decode(req.query.id)
+  models.ClaimInfo.findByPk(claimID, {
+
+    include: [{
+      model:models.ClaimInfoVisits,
+      //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
+      include: [
+        {
+          model: models.ClaimInfoVisitsFiles
+        },
+        {
+          model: models.BillingInfoFiles,
+        },
+        {
+          model: models.DocumentsFiles
+        },
+        {
+          model: models.BillingInfo,
+          include: [
+            {
+              model:models.BenefitCategories,
+            },
+            {
+              model:models.BenefitSubCategories,
+            }
+          ]
+        },
+
+      ],
+    }],
+  }).then (claim => {
+    res.send(claim)
   }).catch(e => {
     console.log(e)
     res.sendStatus(500).send(e)
   })
-
-
 }));
 
-router.put('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
-
-  console.log(req.body)
-  models.ClaimInfo.findByPk(req.body.id).then(async ClaimInfo => {
-    ClaimInfo.update(req.body).then(result => {
-      res.send(result)
-    })
-    .catch (e => {
-      throw e
-    })
-  })
-
-}));
 
 router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
-    console.log('req.query.id',req.query.id)
     const claimID = base64url.decode(req.query.id)
-    console.log(claimID)
-    console.log('1111111111111111111111111111111111111111111111111')
     const claim = await models.ClaimInfo.findByPk(claimID, {
 
       include: [{
@@ -209,6 +216,67 @@ router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   }
 }));
 
+
+router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  var claim = req.body
+  models.ClaimInfo.count({policyNumber:claim.policyNumber}).then(policyCount => {
+    claim.id = claim.policyNumber+"-"+(policyCount+1)
+    claim.status='pr'
+    models.ClaimInfo.create(claim).then(result => {
+      res.send(result)
+    }).catch(e => {throw e})
+  }).catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+}));
+
+router.put('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
+
+  console.log(req.body)
+  models.ClaimInfo.findByPk(req.body.id, {
+    include: [{
+      model:models.ClaimInfoVisits,
+      //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
+      include: [
+        {
+          model: models.ClaimInfoVisitsFiles
+        },
+        {
+          model: models.BillingInfoFiles,
+        },
+        {
+          model: models.DocumentsFiles
+        },
+        {
+          model: models.BillingInfo,
+          include: [
+            {
+              model:models.BenefitCategories,
+            },
+            {
+              model:models.BenefitSubCategories,
+            }
+          ]
+        },
+
+      ],
+    }],
+  }).then(async ClaimInfo => {
+    ClaimInfo.update(req.body).then(result => {
+      res.send(result)
+    })
+    .catch (e => {
+      throw e
+    })
+  })
+
+}));
+
+
 router.get('/claimTitle', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
@@ -233,7 +301,35 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
       models.ClaimInfo.findByPk(req.body.id, {attributes: ['id']}).then(async ClaimInfo => {
         var claim
         if (ClaimInfo) {
-          claim = await ClaimInfo.update(claimInfo)
+          claim = await ClaimInfo.update(claimInfo, {
+            include: [{
+              model:models.ClaimInfoVisits,
+              //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
+              include: [
+                {
+                  model: models.ClaimInfoVisitsFiles
+                },
+                {
+                  model: models.BillingInfoFiles,
+                },
+                {
+                  model: models.DocumentsFiles
+                },
+                {
+                  model: models.BillingInfo,
+                  include: [
+                    {
+                      model:models.BenefitCategories,
+                    },
+                    {
+                      model:models.BenefitSubCategories,
+                    }
+                  ]
+                },
+
+              ],
+            }],
+          })
         } else {
           const policyCount = await models.ClaimInfo.count({policyNumber:claimInfo.policyNumber})
           claimInfo.id = claimInfo.policyNumber+"-"+(policyCount+1)
@@ -241,6 +337,7 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
           console.log(claimInfo)
           claim = await models.ClaimInfo.create(claimInfo)
         }
+        console.log('claim',claim)
         return claim
       }).then(result => {
         res.send(result)
@@ -256,6 +353,7 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
 }));
 
 router.post('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log(req.body)
   models.ClaimInfoVisits.create(req.body, {
         include: [{
           model: models.ClaimInfoVisitsFiles,
@@ -269,7 +367,7 @@ router.post('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
 }));
 
 router.put('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
-  //console.log(req.query)
+  console.log('visit query',req.query)
   if(req.query.dateOfAdmissionVisit)
     req.query.dateOfAdmissionVisit = req.query.dateOfAdmissionVisit.replace(/"/g,'')
   var ClaimInfoVisitsFiles =[]

@@ -97,6 +97,15 @@ module.exports = {
       swift: {
         type: Sequelize.STRING
       },
+      status: {
+        type: Sequelize.STRING
+      },
+      RCExchangeRate: {
+        type: Sequelize.FLOAT
+      },
+      RCExchangeRateDate: {
+        type: Sequelize.DATE
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

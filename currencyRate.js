@@ -27,16 +27,14 @@ var c = new Crawler({
                     newElement['name'] = element[key];
                     break;
                   case "Units per USD":
-                    newElement['perUSD'] = element[key];
-                    break;
-                  case 'USD per Unit':
-                    newElement['USDper'] = element[key];
+                    newElement['rate'] = element[key];
                     break;
                   default:
                     break
                 }
 
               });
+
               newElement['date'] = Date.now()
               //console.log(newElement)
 
@@ -59,7 +57,7 @@ const updateOrCreate = (model, where, newItem, beforeCreate) => {
         .findOne({ where })
         .then(item => {
             if (!item) {
-              console.log('no item')
+
                 // Item doesn't exist, so we create it
 
                 // Custom promise to add more data to the record
@@ -70,7 +68,7 @@ const updateOrCreate = (model, where, newItem, beforeCreate) => {
                             .then(item => ({ item, created: true }))
                     )
             }
-            console.log('there is item')
+            console.log(newItem)
             // Item already exists, so we update it
             return model
                 .update(newItem, {where: where})

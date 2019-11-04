@@ -15,6 +15,7 @@ var convertor = require('./convertor');
 var comments = require('./comments');
 var ravendb = require('./ravendb');
 var files = require('./files');
+var benefitCategories = require('./benefitCategories')
 
 var {authenticate, authError} = require('../middleware');
 
@@ -133,6 +134,8 @@ router.use('/files',files)
 router.use('/ravendb',ravendb)
 
 router.use('/comments',comments)
+
+router.use('/benefitCategories',benefitCategories)
 
 
 module.exports = router;

@@ -33,7 +33,6 @@ router.get('/', function (req, res, next) {
 })
 
 router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log('trigger')
   var result = await main().catch(console.error);
   res.send(result)
 }))
@@ -59,6 +58,9 @@ router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
   console.log(email)
   gmailTransport.sendMail(email).then(result => {
     res.send(result)
+  }).catch(e=> {
+    console.log(e);
+    res.status(500).send(e)
   });
 }))
 
