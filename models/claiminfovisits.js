@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'visitId',  targetKey: 'id',onDelete: 'cascade', hooks: true
     });
 
+    ClaimInfoVisits.hasMany(models.BillingInfoOtherName, {
+      foreignKey: 'visitId',  targetKey: 'id',onDelete: 'cascade', hooks: true
+    });
+
     ClaimInfoVisits.hasMany(models.BillingInfoFiles, {
       foreignKey: 'visitId',  targetKey: 'id', onDelete: 'cascade', hooks: true
     });

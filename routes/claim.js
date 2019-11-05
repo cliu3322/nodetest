@@ -97,6 +97,8 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 }));
 
+
+
 router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
@@ -134,7 +136,6 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   res.json(response);
 }));
 
-
 router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   const claimID = base64url.decode(req.query.id)
   models.ClaimInfo.findByPk(claimID, {
@@ -143,6 +144,9 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
       model:models.ClaimInfoVisits,
       //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
       include: [
+        {
+          model: models.BillingInfoOtherName
+        },
         {
           model: models.ClaimInfoVisitsFiles
         },
@@ -174,7 +178,6 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   })
 }));
 
-
 router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   try {
@@ -187,6 +190,9 @@ router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
         include: [
           {
             model: models.ClaimInfoVisitsFiles
+          },
+          {
+            model: models.BillingInfoOtherName
           },
           {
             model: models.BillingInfoFiles,
@@ -215,7 +221,6 @@ router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
     res.sendStatus(500).send(e)
   }
 }));
-
 
 router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 
@@ -275,7 +280,6 @@ router.put('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   })
 
 }));
-
 
 router.get('/claimTitle', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
@@ -351,6 +355,8 @@ router.post('/insertOrUpdateClaimInfo', awaitErorrHandlerFactory(async (req, res
 
 
 }));
+
+
 
 router.post('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
   console.log(req.body)
@@ -431,7 +437,6 @@ router.delete('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
   })
 }));
 
-
 router.delete('/claimInfoVisitsFile', awaitErorrHandlerFactory(async (req, res, next) => {
   models.ClaimInfoVisitsFiles.findByPk(req.query.id).then(file => {
     if(file)
@@ -479,6 +484,8 @@ router.post('/updateReimbusementCurrency', awaitErorrHandlerFactory(async (req, 
   }
 
 }));
+
+
 
 router.post('/uploadBillingInfo', awaitErorrHandlerFactory( (req, res, next) => {
 //     value:req.body.value
@@ -591,20 +598,22 @@ router.delete('/billingInfoFiles', awaitErorrHandlerFactory(async (req, res, nex
   })
 }));
 
-
-router.post('/uploadBillingInfoOtherName', awaitErorrHandlerFactory(async (req, res, next) => {
+router.post('/billingInfoOther', awaitErorrHandlerFactory((req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260
-  try {
-
-    res.send('insertBillingInfos');
-
-  }
-  catch(e) {
+  models.BillingInfoOtherName.findOne({ where: {visitId: req.body.visitId }} ).then((othername) => {
+    console.log(othername)
+    if(othername) {
+      othername.update(req.body).then(result => res.send(result)).catch(e => {throw e})
+    } else {
+      models.BillingInfoOtherName.create(req.body).then(result => res.send(result)).catch(e => {throw e})
+    }
+  }).catch (e => {
     console.log(e)
-    res.sendStatus(500)
-  }
-
+    res.sendStatus(500).send(e)
+  })
 }));
+
+
 
 router.post('/getVisitsById', awaitErorrHandlerFactory(async (req, res, next) => {
   //https://github.com/node-formidable/node-formidable/issues/260

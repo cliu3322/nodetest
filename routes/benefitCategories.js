@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var models  = require('../models');
 var base64url = require('base64url');
-
+const fs = require('fs');
 
 
 const tableData = JSON.parse(
@@ -433,43 +433,69 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.get('/comments',async function(req, res, next) {
+
+
+function fetch(url) {
+    switch (url) {
+        case 'https://mob-api.com/users':
+            return Promise.resolve([
+                { name: "Andrew", id: "1" },
+                { name: "Sergio", id: "2" },
+                { name: "Richard", id: "3" },
+            ]);
+        case 'https://mob-api.com/pets':
+            return Promise.resolve([
+                { name: "Layla", userId: "1" },
+                { name: "Poopers", userId: "1" },
+                { name: "Athena", userId: "2" },
+                { name: "Fluffy", userId: "2" },
+                { name: "Noelle", userId: "1" },
+                { name: "Anubis", userId: "2" },
+                { name: "Huckleberry", userId: "1" },
+            ]);
+    }
+}
+
+const outputFile = fs.createWriteStream('./a.txt');
+
+function writeFile(filename, content) {
+    outputFile.write(`${filename}: ${content}\n`);
+
+    return Promise.resolve();
+}
+
+async function workWithData() {
+    const users = await fetch('https://mob-api.com/users');
+
+    const pets = await fetch('https://mob-api.com/pets').then(pets => {
+        return pets.sort((a, b) =>{
+          if(a.name < b.name) { return -1; }
+          if(a.name > b.name) { return 1; }
+          return 0;
+        });
+    });
+
+    const usersWithPets = users.map(user => {
+        /* need help here */
+        var newpets = pets.filter(pet => {
+          return pet.userId === user.id;
+        })
+
+        user.pets = newpets
+        return user
+    });
+
+    writeFile('users-with-pets.json', usersWithPets);
+    writeFile('sorted-pets.json', JSON.stringify(pets))
+
+}
+
+
+router.get('/test',async function(req, res, next) {
   //const claimID = base64url.decode(req.query.id)
-  const claimID = req.query.id
-  console.log(claimID)
-  //retrieve policy: Approved YTD, policy Type
-  //from Regency WT: Isured person, Previous, Start Date
-  //? Approved YTD, Gross premium, Payment Frequency
-
-  models.Comments.findAll({
-    where:{claimInfoId:claimID},
-    order: [['createdAt', 'DESC']],
-  }).then(comments => {
-
-    res.json(comments);
-  }).catch( e => {
-    console.log(e)
-    res.sendStatus(500).send(e)
-  })
-
-
-  //retrieve patient, we should build patient db in the future
-
+  workWithData().then(() => outputFile.end());
 });
 
-router.post('/comments',async function(req, res, next) {
-  // const claimID = base64url.decode(req.query.id)
-
-  models.Comments.create(req.body).then(comment => {
-
-    res.json(comment);
-  }).catch( e => {
-    console.log(e)
-    res.sendStatus(500).send(e)
-  })
-
-
-});
 
 
 module.exports = router;
