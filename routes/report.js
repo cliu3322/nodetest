@@ -5,6 +5,7 @@ var express = require('express')
 var router = express.Router()
 var models = require('../models')
 //var XLSX = require('xlsx')
+const moment = require('moment');
 const sequelize = require('sequelize');
 
 
@@ -148,25 +149,101 @@ router.get('/claimCount', async function (req, res, next) {
 
 })
 
-router.get('/USD Approved', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
-    // attributes: [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101),'day'], [sequelize.fn('COUNT', 'status'), 'statusCount'], 'status'],
-    // //group:'createdAt'
-    // group : [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101)], 'status']
-    attributes: [
-      [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0),'month'],
-      [sequelize.fn('COUNT', sequelize.literal("case status when 'pr' then 1 else null end")), 'prCount'],
-      [sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 else null end")), 'cpCount']
-    ],
-    //group:'createdAt'
-    group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
-    order: [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
-    raw: true
+router.get('/USDApproved1', async function (req, res, next) {
+  var bill = await models.BillingInfo.findAll({
+    attributes: ['value'],
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['billingRate'],
+      include: [{
+        model:models.ClaimInfo,
+        where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
+        attributes: ['status'],
+        group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
+      }],
+    }],
   });
-  console.log(claims)
-  res.send(claims)
+  res.send(bill)
+})
+
+router.get('/USDApproved', async function (req, res, next) {
+  var bill = await models.ClaimInfo.findAll({
+    attributes: ['createdAt'],
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['billingRate'],
+      include: [{
+        model:models.BillingInfo,
+        attributes: ['value', 'approved']
+      }],
+    }],
+    where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
+    //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+  });
+  console.log(bill)
+  res.send(bill)
+})
+
+router.get('/USDRejected', async function (req, res, next) {
+  var bill = await models.ClaimInfo.findAll({
+    attributes: ['createdAt'],
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['billingRate'],
+      include: [{
+        model:models.BillingInfo,
+        attributes: ['value', 'approved']
+      }],
+    }],
+    where: {[sequelize.Op.or]: [ {status: 'cp'},{status: 'cd'}, ]},
+    //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+  });
+  res.send(bill)
+})
+
+router.get('/approvedClaimedCountByType', async function (req, res, next) {
+  var claim = await models.ClaimInfo.findAll({
+    attributes: ['policyType', [sequelize.fn('COUNT', 'policyType'), 'policyTypeCount']],
+    where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
+    group: ['policyType'],
+    //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+  });
+  res.send(claim)
+})
 
 
+router.get('/turnaroundTime', async function (req, res, next) {
+  var claim = await models.ClaimInfo.findAll({
+    attributes: ['createdAt', 'updatedAt'],
+    where: {
+      [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}],
+    },
+    where: {
+      updatedAt: {
+        [sequelize.Op.gte]: moment().subtract(90, 'days').toDate()
+      }
+    },
+  });
+  res.send(claim)
+})
+
+
+router.get('/USDApproved0', async function (req, res, next) {
+  var bill = await models.ClaimInfo.findAll({
+    attributes: ['createdAt'],
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['billingRate'],
+      include: [{
+        model:models.BillingInfo,
+        attributes: [[sequelize.fn('sum', sequelize.col('value')), 'valueT'],[sequelize.fn('sum', sequelize.col('approved')), 'approvedT']]
+      }],
+    }],
+    where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
+    //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+  });
+  console.log(bill)
+  res.send(bill)
 })
 
 router.get('/test1', async function (req, res, next) {
