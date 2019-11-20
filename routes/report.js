@@ -103,6 +103,7 @@ router.get('/csv', async function (req, res, next) {
   // var wb = XLSX.utils.book_new();
   // XLSX.utils.book_append_sheet(wb, ws, 'report');
   // XLSX.writeFile(wb, 'out.xlsb');
+  console.log('csv result', result)
   res.send(result)
 })
 
@@ -122,8 +123,8 @@ router.get('/json', async function (req, res, next) {
       }],
     }],
   });
-
-  res.send(claims)
+  console.log('json result', claims)
+  res.json(claims)
 
 
 })
@@ -144,7 +145,7 @@ router.get('/claimCount', async function (req, res, next) {
     raw: true
   });
   console.log(claims)
-  res.send(claims)
+  res.json(claims)
 
 
 })
@@ -163,7 +164,7 @@ router.get('/USDApproved1', async function (req, res, next) {
       }],
     }],
   });
-  res.send(bill)
+  res.json(bill)
 })
 
 router.get('/USDApproved', async function (req, res, next) {
@@ -181,7 +182,7 @@ router.get('/USDApproved', async function (req, res, next) {
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   });
   console.log(bill)
-  res.send(bill)
+  res.json(bill)
 })
 
 router.get('/USDRejected', async function (req, res, next) {
@@ -198,7 +199,7 @@ router.get('/USDRejected', async function (req, res, next) {
     where: {[sequelize.Op.or]: [ {status: 'cp'},{status: 'cd'}, ]},
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   });
-  res.send(bill)
+  res.json(bill)
 })
 
 router.get('/approvedClaimedCountByType', async function (req, res, next) {
@@ -208,7 +209,7 @@ router.get('/approvedClaimedCountByType', async function (req, res, next) {
     group: ['policyType'],
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   });
-  res.send(claim)
+  res.json(claim)
 })
 
 
@@ -224,7 +225,7 @@ router.get('/turnaroundTime', async function (req, res, next) {
       }
     },
   });
-  res.send(claim)
+  res.json(claim)
 })
 
 
@@ -243,7 +244,7 @@ router.get('/USDApproved0', async function (req, res, next) {
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   });
   console.log(bill)
-  res.send(bill)
+  res.json(bill)
 })
 
 router.get('/test1', async function (req, res, next) {
@@ -257,7 +258,7 @@ router.get('/test1', async function (req, res, next) {
     raw: false
   });
 
-  res.send(claims)
+  res.json(claims)
 
 
 })
