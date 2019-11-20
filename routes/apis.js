@@ -19,7 +19,7 @@ var comments = require('./comments');
 var ravendb = require('./ravendb');
 var files = require('./files');
 
-var benefitCategories = require('./benefitCategories')
+//var benefitCategories = require('./benefitCategories')
 
 
 var {authenticate, authError} = require('../middleware');
@@ -144,7 +144,7 @@ router.use('/ravendb',ravendb)
 router.use('/comments',comments)
 
 
-router.use('/benefitCategories',benefitCategories)
+//router.use('/benefitCategories',benefitCategories)
 
 
 
