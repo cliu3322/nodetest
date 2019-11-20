@@ -288,18 +288,10 @@ router.get('/USDApproved0', function (req, res, next) {
   })
 })
 
-router.get('/test1', async function (req, res, next) {
-  var claims = await models.ClaimInfoVisits.findAll({
-    attributes: ['id', [models.sequelize.fn('sum', models.sequelize.col('BillingInfos.value')), 'visitTotal']],
-    include: [{
-      model:models.BillingInfo,
-      attributes: [],
-    }],
-    group: ['ClaimInfoVisits.id'],
-    raw: false
-  });
+router.get('/test', async function (req, res, next) {
 
-  res.json(claims)
+
+  res.send('asdfadsfadfasdfasdfas')
 
 
 })
