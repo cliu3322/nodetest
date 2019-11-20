@@ -23,8 +23,8 @@ const awaitErorrHandlerFactory = middleware => {
 }
 
 
-router.get('/', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
+router.get('/', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['id', 'policyNumber', [models.sequelize.fn('sum', models.sequelize.col('ClaimInfoVisits.id')), 'total_cost']],
     where: req.query,
     include: [{
@@ -33,82 +33,92 @@ router.get('/', async function (req, res, next) {
     }],
     group: ['ClaimInfo.id', 'ClaimInfo.policyNumber'],
     raw: false
-  });
+  })
+  .then(claim => res.send(claim))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 
-  res.send(claims)
+
 
 
 })
 
 
 router.get('/csv', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
-    //attributes: ['id', 'policyNumber'],
-    include: [{
-      model:models.ClaimInfoVisits,
-      attributes: ['id', 'billingRate'],
+  try {
+    var claims = await models.ClaimInfo.findAll({
+      //attributes: ['id', 'policyNumber'],
       include: [{
-        model:models.BillingInfo,
-        attributes: ['value','approved'],
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'billingRate'],
         include: [{
-          model:models.BenefitSubCategories,
-          attributes: ['name'],
+          model:models.BillingInfo,
+          attributes: ['value','approved'],
+          include: [{
+            model:models.BenefitSubCategories,
+            attributes: ['name'],
+          }],
         }],
       }],
-    }],
-  });
+    });
 
-  var claimArry = JSON.stringify(claims)
+    var claimArry = JSON.stringify(claims)
 
-  var result = JSON.parse(claimArry).map(claim => {
-    var newclaim = claim.ClaimInfoVisits.reduce((acc,curr) => {
+    var result = JSON.parse(claimArry).map(claim => {
+      var newclaim = claim.ClaimInfoVisits.reduce((acc,curr) => {
 
-      curr.BillingInfos.map(bill => {
-        bill.value /= curr.billingRate
-        bill.approved /= curr.billingRate
-        return bill
-      })
-      return acc.concat(curr.BillingInfos)
-    },[]).reduce((acc,obj) => {
-      var key = obj.BenefitSubCategory.name;
-      if(key === '') {
-        key = 'Other'
-      }
-
-      key += ' claimed'
-      if (acc[key] === undefined) {
-        acc[key] = 0;
-      }
-      acc[key] += obj.value;
-
-      var keyapproved = obj.BenefitSubCategory.name;
-        if(keyapproved === '') {
-          keyapproved = 'Other'
+        curr.BillingInfos.map(bill => {
+          bill.value /= curr.billingRate
+          bill.approved /= curr.billingRate
+          return bill
+        })
+        return acc.concat(curr.BillingInfos)
+      },[]).reduce((acc,obj) => {
+        var key = obj.BenefitSubCategory.name;
+        if(key === '') {
+          key = 'Other'
         }
 
-      keyapproved += ' approved'
-      if (acc[keyapproved] === undefined) {
-        acc[keyapproved] = 0;
-      }
-      acc[keyapproved] += obj.approved;
+        key += ' claimed'
+        if (acc[key] === undefined) {
+          acc[key] = 0;
+        }
+        acc[key] += obj.value;
 
-      return acc;
-    },[])
-    Object.assign(claim, newclaim)
-    delete claim['ClaimInfoVisits']
+        var keyapproved = obj.BenefitSubCategory.name;
+          if(keyapproved === '') {
+            keyapproved = 'Other'
+          }
 
-    return claim
-  })
-  // var ws = XLSX.utils.json_to_sheet(result);
-  // var wb = XLSX.utils.book_new();
-  // XLSX.utils.book_append_sheet(wb, ws, 'report');
-  // XLSX.writeFile(wb, 'out.xlsb');
-  console.log('csv result', result)
-  res.send(result)
+        keyapproved += ' approved'
+        if (acc[keyapproved] === undefined) {
+          acc[keyapproved] = 0;
+        }
+        acc[keyapproved] += obj.approved;
+
+        return acc;
+      },[])
+      Object.assign(claim, newclaim)
+      delete claim['ClaimInfoVisits']
+
+      return claim
+    })
+    // var ws = XLSX.utils.json_to_sheet(result);
+    // var wb = XLSX.utils.book_new();
+    // XLSX.utils.book_append_sheet(wb, ws, 'report');
+    // XLSX.writeFile(wb, 'out.xlsb');
+    console.log('csv result', result)
+    res.send(result)
+  } catch(e) {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  }
 })
 
-router.get('/json', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
+router.get('/json', function (req, res, next) {
+  models.ClaimInfo.findAll({
     //attributes: ['id', 'policyNumber'],
     include: [{
       model:models.ClaimInfoVisits,
@@ -122,15 +132,19 @@ router.get('/json', async function (req, res, next) {
         }],
       }],
     }],
-  });
-  console.log('json result', claims)
-  res.json(claims)
+  })
+  .then(claim => res.send(claim))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
 
 
 })
 
-router.get('/claimCount', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
+router.get('/claimCount', function (req, res, next) {
+  models.ClaimInfo.findAll({
     // attributes: [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101),'day'], [sequelize.fn('COUNT', 'status'), 'statusCount'], 'status'],
     // //group:'createdAt'
     // group : [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101)], 'status']
@@ -143,15 +157,19 @@ router.get('/claimCount', async function (req, res, next) {
     group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
     order: [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
     raw: true
-  });
-  console.log(claims)
-  res.json(claims)
+  })
+  .then(claim => res.send(claim))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
 
 
 })
 
-router.get('/USDApproved1', async function (req, res, next) {
-  var bill = await models.BillingInfo.findAll({
+router.get('/USDApproved1', function (req, res, next) {
+  models.BillingInfo.findAll({
     attributes: ['value'],
     include: [{
       model:models.ClaimInfoVisits,
@@ -163,12 +181,17 @@ router.get('/USDApproved1', async function (req, res, next) {
         group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
       }],
     }],
-  });
-  res.json(bill)
+  })
+  .then(bill => res.send(bill))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
 })
 
-router.get('/USDApproved', async function (req, res, next) {
-  var bill = await models.ClaimInfo.findAll({
+router.get('/USDApproved', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['createdAt'],
     include: [{
       model:models.ClaimInfoVisits,
@@ -180,13 +203,16 @@ router.get('/USDApproved', async function (req, res, next) {
     }],
     where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
-  });
-  console.log(bill)
-  res.json(bill)
+  })
+  .then(bill => res.send(bill))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 })
 
-router.get('/USDRejected', async function (req, res, next) {
-  var bill = await models.ClaimInfo.findAll({
+router.get('/USDRejected', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['createdAt'],
     include: [{
       model:models.ClaimInfoVisits,
@@ -198,23 +224,31 @@ router.get('/USDRejected', async function (req, res, next) {
     }],
     where: {[sequelize.Op.or]: [ {status: 'cp'},{status: 'cd'}, ]},
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
-  });
-  res.json(bill)
+  })
+  .then(bill => res.send(bill))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 })
 
-router.get('/approvedClaimedCountByType', async function (req, res, next) {
-  var claim = await models.ClaimInfo.findAll({
+router.get('/approvedClaimedCountByType', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['policyType', [sequelize.fn('COUNT', 'policyType'), 'policyTypeCount']],
     where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
     group: ['policyType'],
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
-  });
-  res.json(claim)
+  })
+  .then(claim => res.send(claim))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 })
 
 
-router.get('/turnaroundTime', async function (req, res, next) {
-  var claim = await models.ClaimInfo.findAll({
+router.get('/turnaroundTime', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['createdAt', 'updatedAt'],
     where: {
       [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}],
@@ -224,13 +258,17 @@ router.get('/turnaroundTime', async function (req, res, next) {
         [sequelize.Op.gte]: moment().subtract(90, 'days').toDate()
       }
     },
-  });
-  res.json(claim)
+  })
+  .then(claim => res.send(claim))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 })
 
 
-router.get('/USDApproved0', async function (req, res, next) {
-  var bill = await models.ClaimInfo.findAll({
+router.get('/USDApproved0', function (req, res, next) {
+  models.ClaimInfo.findAll({
     attributes: ['createdAt'],
     include: [{
       model:models.ClaimInfoVisits,
@@ -242,9 +280,12 @@ router.get('/USDApproved0', async function (req, res, next) {
     }],
     where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
-  });
-  console.log(bill)
-  res.json(bill)
+  })
+  .then(bill => res.send(bill))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
 })
 
 router.get('/test1', async function (req, res, next) {
