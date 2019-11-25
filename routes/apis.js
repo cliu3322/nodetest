@@ -123,25 +123,25 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	})
 );
 
-router.use('/report',report)
+router.use('/report', [authenticate, authError],report)
 
-router.use('/test',test)
+router.use('/test', [authenticate, authError],test)
 
-router.use('/claim', claim);
+router.use('/claim', [authenticate, authError], claim);
 
-router.use('/evaluate', evaluate);
+router.use('/evaluate', [authenticate, authError], evaluate);
 
-router.use('/constant', constant);
+router.use('/constant',[authenticate, authError], constant);
 
-router.use('/email',emailRouter);
+router.use('/email', [authenticate, authError], emailRouter);
 
-router.use('/convertor',convertor)
+router.use('/convertor', [authenticate, authError], convertor)
 
-router.use('/files',files)
+router.use('/files', [authenticate, authError], files)
 
-router.use('/ravendb',ravendb)
+router.use('/ravendb', [authenticate, authError], ravendb)
 
-router.use('/comments',comments)
+router.use('/comments', [authenticate, authError], comments)
 
 
 //router.use('/benefitCategories',benefitCategories)

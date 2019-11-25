@@ -1,7 +1,8 @@
 //https://blogs.msdn.microsoft.com/reactjsnodejsazure/2017/08/01/reactjs-nodejs-express-azure-web-app/   combine client with server
 //https://medium.com/@chrisjr06/creating-mern-stack-app-and-hosting-in-microsoft-azure-using-create-react-app-w-continuous-4acef0c87e71 as above
 //https://burkeknowswords.com/introducing-express-react-starter-b6d299206a3a
-
+//https://github.com/PerimeterX/node-http2-server-push/blob/master/express/spdy.js
+//HTTP2 tobedone
 //https://flaviocopes.com/express-send-response/
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -11,6 +12,8 @@ var apis = require('./routes/apis');
 
 var createError = require('http-errors');
 var express = require('express');
+var compression = require('compression')
+const {getFileHttp1 } = require('./shared');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -28,6 +31,7 @@ var fs = require('fs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(logger('dev'));
+app.use(compression())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -46,9 +50,11 @@ app.use('/upload', express.static(path.join(__dirname, '../upload')))
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/*', function(req, res) {
-  console.log('* is triggered')
+  console.debug('* is triggered')
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
+
 
 
 
