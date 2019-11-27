@@ -101,27 +101,34 @@ router.post('/uploaddocument', awaitErorrHandlerFactory(async (req, res, next) =
 
 router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
+  var query = {}
   try {
-    var query = req.query
     if(req.query.or) {
-      var newQuery = req.query.or.map(function(item) {
+      let newQuery = req.query.or.map(function(item) {
         return JSON.parse(item)
       })
-      console.log(newQuery)
-      req.query = {[sequelize.Op.or]:newQuery}
+      query = {...query, ...{[sequelize.Op.or]:newQuery}}
     }
-    console.log(req.query)
+    if(req.query.and) {
+      let newQuery = req.query.and.map(function(item) {
+        return JSON.parse(item)
+      })
+      query = {...query, ...{[sequelize.Op.and]:newQuery}}
+    }
+    if(req.query.query) {
+      //either replace by https://www.npmjs.com/package/expression-eval, or parse the url yourself. I put this way to save time for the first version of claim system demo
+      query= eval(req.query.query)[0]
+    }
 
     var claims = await models.ClaimInfo.findAll({
       attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
-      where: req.query,
+      where: query,
       include: [{
         model:models.ClaimInfoVisits,
         attributes: ['id', 'billingRate'],
         include: [{
           attributes: ['value'],
           model: models.BillingInfo,
-
         }],
       }],
       raw: false
