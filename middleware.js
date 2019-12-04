@@ -4,20 +4,18 @@ var Config = require('./config');
 const { secretKey } = Config;
 
 const authenticate = (req, res, next) => {
-	console.log('middleware')
 	const token = req.headers.authorization || '';
-	console.log('token',token)
-	console.log('secretKey',secretKey)
 	jsonwebtoken.verify(token, secretKey, (error, decoded) => {
 		if (error) {
-
+			console.log(error)
 			next({ error: 'token varified failed' });
 		} else {
-			console.log('pass')
+
 			const { expiredAt } = decoded;
 			if (expiredAt > new Date().getTime()) {
 				next();
 			} else {
+				console.log('token expired')
 				next({ error: 'token expired' });
 			}
 		}

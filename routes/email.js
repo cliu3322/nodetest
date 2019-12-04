@@ -28,26 +28,73 @@ const awaitErorrHandlerFactory = middleware => {
 }
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a test')
+router.get('/', async function (req, res, next) {
+  const claim = await models.ClaimInfo.findByPk('RIH/YYYY/XX/11111111-5', {
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
+    }],
+  })
+  const result = claim.toJSON()
+  MailConfig.ViewOption(gmailTransport,hbs);
+  var email = {
+    from: 'vip@whitehouse.org', // sender address
+    to: 'cliu3322@hawaii.edu'+','+result.contactEmail, // list of receivers
+    subject: 'Your claim has been registered', // Subject line
+    template: 'red_v3',
+    context: {
+      ucn:result.id,
+      visits:result.ClaimInfoVisits,
+      contactName:result.contactFirstName + ' ' + result.contactLastName,
+      patientName: result.patientFirstName + ' ' + result.patientLastName,
+      cause: result.cause,
+      email: "tariqul.islam.rony@gmail.com",
+      address: req.body.claimID
+    },
+    attachments: [{
+        filename: 'a.png',
+        path: __dirname +'/../views/img/a.png',
+        cid: 'unique@nodemailer.com' //same cid value as in the html img src
+    }]
+  }
+  console.log(email)
+  gmailTransport.sendMail(email).then(result => {
+    res.send(result)
+  }).catch(e=> {
+    console.log(e);
+    res.status(500).send(e)
+  });
 })
 
 router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log(req.body)
   var result = await main().catch(console.error);
   res.send(result)
 }))
 
 router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
+  console.log(req.body)
+  const claim = await models.ClaimInfo.findByPk(req.body.claimID, {
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
+    }],
+  })
+  const result = claim.toJSON()
   MailConfig.ViewOption(gmailTransport,hbs);
   var email = {
-    from: 'liuchunyi1987@hotmail.com', // sender address
-    to: 'cliu3322@hawaii.edu'+','+req.body.contactEmail, // list of receivers
-    subject: 'Hello ✔', // Subject line
-    template: 'threecolumns',
+    from: 'vip@whitehouse.org', // sender address
+    to: 'cliu3322@hawaii.edu'+','+result.contactEmail, // list of receivers
+    subject: 'Your claim has been registered', // Subject line
+    template: 'red_v3',
     context: {
-      name:req.body.policyFirstName + ' ' + req.body.policyLastName,
+      ucn:result.id,
+      visits:result.ClaimInfoVisits,
+      contactName:result.contactFirstName + ' ' + result.contactLastName,
+      patientName: result.patientFirstName + ' ' + result.patientLastName,
+      cause: result.cause,
       email: "tariqul.islam.rony@gmail.com",
-      address: "52, Kadamtola Shubag dhaka"
+      address: req.body.claimID
     },
     attachments: [{
         filename: 'a.png',

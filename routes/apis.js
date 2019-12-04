@@ -133,7 +133,7 @@ router.use('/evaluate', [authenticate, authError], evaluate);
 
 router.use('/constant',[authenticate, authError], constant);
 
-router.use('/email', [authenticate, authError], emailRouter);
+router.use('/email',  [authenticate, authError], emailRouter);
 
 router.use('/convertor', [authenticate, authError], convertor)
 
