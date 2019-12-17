@@ -47,9 +47,28 @@ router.get('/', function (req, res, next) {
 
 
 router.get('/csv', async function (req, res, next) {
+  var params = null
+  console.log(req.query)
+  switch (req.query['2']) {
+    case 'claims':
+      params = [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}]
+      break;
+    case 'pendings':
+      params = [{status: 'pr'}, {status: 'pe'}, {status: 'pd'}, {status: 're-pd'}, {status: 're-pr'}]
+      break;
+  
+    default:
+      break;
+  }
   try {
     var claims = await models.ClaimInfo.findAll({
       //attributes: ['id', 'policyNumber'],
+      where: {
+        [sequelize.Op.and]: {
+          [sequelize.Op.or]: params, 
+          createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+        }
+      },
       include: [{
         model:models.ClaimInfoVisits,
         attributes: ['id', 'billingRate'],
@@ -109,7 +128,6 @@ router.get('/csv', async function (req, res, next) {
     // var wb = XLSX.utils.book_new();
     // XLSX.utils.book_append_sheet(wb, ws, 'report');
     // XLSX.writeFile(wb, 'out.xlsb');
-    console.log('csv result', result)
     res.send(result)
   } catch(e) {
     console.log(e)
@@ -153,6 +171,11 @@ router.get('/claimCount', function (req, res, next) {
       [sequelize.fn('COUNT', sequelize.literal("case status when 'pr' then 1 else null end")), 'prCount'],
       [sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 else null end")), 'cpCount']
     ],
+    where: {
+      [sequelize.Op.and]: {
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+      }
+    },
     //group:'createdAt'
     group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
     order: [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
@@ -201,8 +224,12 @@ router.get('/USDApproved', function (req, res, next) {
         attributes: ['value', 'approved']
       }],
     }],
-    where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
-    //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+    where: {
+      [sequelize.Op.and]: {
+        [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}], 
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+      }
+    },
   })
   .then(bill => res.send(bill))
   .catch(e => {
@@ -222,7 +249,12 @@ router.get('/USDRejected', function (req, res, next) {
         attributes: ['value', 'approved']
       }],
     }],
-    where: {[sequelize.Op.or]: [ {status: 'cp'},{status: 'cd'}, ]},
+    where: {
+      [sequelize.Op.and]: {
+        [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}], 
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+      }
+    },
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   })
   .then(bill => res.send(bill))
@@ -235,7 +267,12 @@ router.get('/USDRejected', function (req, res, next) {
 router.get('/approvedClaimedCountByType', function (req, res, next) {
   models.ClaimInfo.findAll({
     attributes: ['policyType', [sequelize.fn('COUNT', 'policyType'), 'policyTypeCount']],
-    where: {[sequelize.Op.or]: [{status: 'ca'}, {status: 'cp'}]},
+    where: {
+      [sequelize.Op.and]: {
+        [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}], 
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+      }
+    },
     group: ['policyType'],
     //group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
   })
@@ -251,17 +288,14 @@ router.get('/turnaroundTime', function (req, res, next) {
   models.ClaimInfo.findAll({
     attributes: ['createdAt', 'updatedAt'],
     where: {
-      [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}],
-    },
-    where: {
-      updatedAt: {
-        [sequelize.Op.gte]: moment().subtract(90, 'days').toDate()
+      [sequelize.Op.and]: {
+        [sequelize.Op.or]: [{status: 'cd'}, {status: 'cp'}, {status: 'ca'}, {status: 'cc'}], 
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
       }
     },
   })
   .then(claim => res.send(claim))
   .catch(e => {
-    console.log(e)
     res.sendStatus(500).send(e)
   })
 })
