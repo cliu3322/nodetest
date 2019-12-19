@@ -12,6 +12,42 @@ router.get('/', function(req, res, next) {
   res.json({ firstName: 'constant' })
 });
 
+router.get('/claiminfo', async function(req, res, next) {
+  try {
+
+    var attributes = ['id','createdBy','accountHoldersName',
+    'bankAccountNumber','bankAddress', 'bankName', 'createdAt'
+  ]
+    const data = await models.ClaimInfos_v1.findAll({attributes: attributes});
+    console.log(data)
+    const getData = async () => {
+      return await Promise.all(
+        data.forEach(
+          async item => {
+            return item
+            //return models.ClaimInfo.create(item)
+          }
+        )
+      )
+    }
+    const results = await getData()
+    console.log(results)
+    // console.log(data.createdAt)
+    // console.log(data[0].toJSON().createdAt)
+    
+    //const results = await models.ClaimInfo.create(data[0].toJSON())
+    //const response = await models.ClaimInfo.bulkCreate(data)
+    res.json(results)
+  } catch (error) {
+    console.log(error)
+  }
+  
+
+
+
+ 
+});
+
 router.get('/getCurrencyRate', async function(req, res, next) {
   try {
     const response = await models.ExchangeRate.findAll({});

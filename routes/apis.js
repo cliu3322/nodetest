@@ -131,7 +131,7 @@ router.use('/claim', [authenticate, authError], claim);
 
 router.use('/evaluate', [authenticate, authError], evaluate);
 
-router.use('/constant',[authenticate, authError], constant);
+router.use('/constant', constant);
 
 router.use('/email',  [authenticate, authError], emailRouter);
 

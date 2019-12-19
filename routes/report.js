@@ -162,14 +162,36 @@ router.get('/json', function (req, res, next) {
 })
 
 router.get('/claimCount', function (req, res, next) {
+  // models.ClaimInfo.findAll({
+  //   // attributes: [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101),'day'], [sequelize.fn('COUNT', 'status'), 'statusCount'], 'status'],
+  //   // //group:'createdAt'
+  //   // group : [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101)], 'status']
+  //   attributes: [
+  //     [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0),'month'],
+  //     [sequelize.fn('COUNT', sequelize.literal("case status when 'pr' then 1 else null end")), 'prCount'],
+  //     [sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 else null end")), 'cpCount']
+  //   ],
+  //   where: {
+  //     [sequelize.Op.and]: {
+  //       createdAt:{[sequeliz[sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 else null end")), 'cpCount']e.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+  //     }
+  //   },
+  //   //group:'createdAt'
+  //   group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
+  //   order: [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0)]],
+  //   raw: true
+  // })
+  // .then(claim => res.send(claim))
+  // .catch(e => {
+  //   console.log(e)
+  //   res.sendStatus(500).send(e)
+  // })
+
   models.ClaimInfo.findAll({
-    // attributes: [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101),'day'], [sequelize.fn('COUNT', 'status'), 'statusCount'], 'status'],
-    // //group:'createdAt'
-    // group : [[sequelize.fn('CONVERT',sequelize.literal('varchar'), sequelize.col('createdAt'),101)], 'status']
     attributes: [
-      [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0),'month'],
-      [sequelize.fn('COUNT', sequelize.literal("case status when 'pr' then 1 else null end")), 'prCount'],
-      [sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 else null end")), 'cpCount']
+      [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('createdAt')),0), 'month'],
+      [sequelize.fn('COUNT', sequelize.literal("case status when 'cp' then 1 when 'ca' then 1 else null end")), 'ApprovedCount'],
+      [sequelize.fn('COUNT', sequelize.literal("case status when 'cd' then 1 else null end")), 'DeclinedCount']
     ],
     where: {
       [sequelize.Op.and]: {
