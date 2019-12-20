@@ -123,7 +123,7 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 	})
 );
 
-router.use('/report', [authenticate, authError],report)
+router.use('/report',report)
 
 router.use('/test', [authenticate, authError],test)
 
