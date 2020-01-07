@@ -385,6 +385,7 @@ router.put('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
     req.query.dateOfAdmissionVisit = req.query.dateOfAdmissionVisit.replace(/"/g,'')
   var ClaimInfoVisitsFiles =[]
   if(req.query.ClaimInfoVisitsFiles) {
+    
     if(req.query.ClaimInfoVisitsFiles.length === 1){
 
       ClaimInfoVisitsFiles.push(JSON.parse(req.query.ClaimInfoVisitsFiles))
@@ -399,6 +400,7 @@ router.put('/visit', awaitErorrHandlerFactory(async (req, res, next) => {
     }
 
   }
+  console.log('after', ClaimInfoVisitsFiles)
 
   req.query.ClaimInfoVisitsFiles = ClaimInfoVisitsFiles
 
@@ -457,42 +459,6 @@ router.delete('/claimInfoVisitsFile', awaitErorrHandlerFactory(async (req, res, 
   })
 }));
 
-router.post('/updateReimbusementCurrency', awaitErorrHandlerFactory(async (req, res, next) => {
-  const response = {};
-
-  var claimInfo =  req.body
-  //console.log(claimInfo)
-  if (claimInfo.id){
-
-    try {
-      models.ClaimInfo.findByPk(claimInfo.id).then(claimInfo => {
-        console.log(claimInfo)
-        models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
-          console.log(exchangeRate)
-          if(exchangeRate){
-            claimInfo.update({
-              RCExchangeRate: exchangeRate.rate,
-              RCExchangeRateDate:exchangeRate.updatedAt
-            }).then(result => {
-              res.send(claimInfo)
-            }).catch(e => {throw e})
-          } else {
-            res.send(claimInfo)
-          }
-        })
-      })
-
-    } catch(e) {
-      console.log(e)
-      res.sendStatus(500).send(e)
-    }
-  } else {
-    res.sendStatus(500).send('need a claimID!')
-  }
-
-}));
-
-
 
 router.post('/uploadBillingInfo', awaitErorrHandlerFactory( (req, res, next) => {
 //     value:req.body.value
@@ -550,33 +516,6 @@ router.put('/billingInfo', awaitErorrHandlerFactory( (req, res, next) => {
     console.log('this is some error',e)
     res.sendStatus(500).send(e)
   })
-
-}));
-
-router.post('/updateBillingCurrency', awaitErorrHandlerFactory( (req, res, next) => {
-
-  console.log(req.body)
-  models.ClaimInfoVisits.findOne({
-    where:{
-      id:req.body.id,
-    }
-  }).then(visit => {
-    if (visit) {
-      return visit.update({
-        billingCurrency:req.body.billingCurrency,
-        currencyDate:req.body.currencyDate,
-        billingRate:req.body.billingUsdper
-      })
-    } else {
-      return null
-    }
-  }).then(result => {
-    res.send(result)
-  }).catch (e => {
-    console.log(e)
-    res.sendStatus(500).send(e)
-  })
-
 
 }));
 

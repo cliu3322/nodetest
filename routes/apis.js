@@ -127,7 +127,7 @@ router.use('/report',report)
 
 router.use('/test', [authenticate, authError],test)
 
-router.use('/claim', [authenticate, authError], claim);
+router.use('/claim', claim);
 
 router.use('/evaluate', [authenticate, authError], evaluate);
 
