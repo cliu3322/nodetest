@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var models  = require('../models');
 var base64url = require('base64url');
-
+const sequelize = require('sequelize');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   console.log(req.query)
@@ -55,7 +55,7 @@ router.post('/assessment',async function(req, res, next) {
 });
 
 router.get('/patientClaims', function(req, res, next) {
-  const claimID = base64url.decode(req.query.id)
+  const claimID = req.query.id
 
   console.log(claimID)
   models.ClaimInfo.findByPk(claimID, {attributes: ['patientFirstName', 'patientLastName','patientDob']}).then(claim => {
@@ -63,7 +63,8 @@ router.get('/patientClaims', function(req, res, next) {
       where: {
         patientFirstName: claim.patientFirstName,
         patientLastName: claim.patientLastName,
-        patientDob:claim.patientDob
+        patientDob:claim.patientDob, 
+        status:{[sequelize.Op.or]:['ca', 'cp', 'cc']}
       },
       attributes: ['id', 'createdAt','cause'],
       include: [{
