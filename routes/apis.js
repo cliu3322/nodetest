@@ -18,6 +18,7 @@ var convertor = require('./convertor');
 var comments = require('./comments');
 var ravendb = require('./ravendb');
 var files = require('./files');
+var payment = require('./payment')
 
 //var benefitCategories = require('./benefitCategories')
 
@@ -131,7 +132,7 @@ router.use('/claim', claim);
 
 router.use('/evaluate', [authenticate, authError], evaluate);
 
-router.use('/constant', constant);
+router.use('/constant', [authenticate, authError], constant);
 
 router.use('/email',  [authenticate, authError], emailRouter);
 
@@ -142,6 +143,8 @@ router.use('/files', [authenticate, authError], files)
 router.use('/ravendb', [authenticate, authError], ravendb)
 
 router.use('/comments', [authenticate, authError], comments)
+
+router.use('/payment', payment);
 
 
 //router.use('/benefitCategories',benefitCategories)

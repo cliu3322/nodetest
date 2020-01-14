@@ -38,18 +38,17 @@ router.get('/assessment',async function(req, res, next) {
 });
 
 router.post('/assessment',async function(req, res, next) {
-  console.log(req.body.data)
-  var comment = {claimInfoId:req.body.data.claimInfoId, createdBy:req.body.data.createdBy, group:'evaluate', message:req.body.data.rationale}
+  var comment = req.body.comment
   const commentResult = await models.Comments.create(comment)
-  const assessmentResult = await  models.Acessment.findByPk(req.body.data.claimInfoId).then(assessment => {
+  const assessmentResult = await  models.Acessment.findByPk(req.body.assessment.claimInfoId).then(assessment => {
     if(assessment) {
-      return assessment.update(req.body.data)
+      return assessment.update(req.body.assessment)
     } else {
-      return models.Acessment.create(req.body.data)
+      return models.Acessment.create(req.body.assessment)
     }
   })
-  const claimResult = await models.ClaimInfo.findByPk(req.body.data.claimInfoId).then(item => {
-    return item.update({ status: 'pd'})
+  const claimResult = await models.ClaimInfo.findByPk(req.body.assessment.claimInfoId).then(item => {
+    return item.update({ status: req.body.status})
   })
   res.send({commentResult,assessmentResult ,claimResult})
 });

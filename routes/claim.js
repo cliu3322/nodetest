@@ -103,6 +103,7 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   var query = {}
   try {
+    console.log('req.query', req.query)
     if(req.query.or) {
       let newQuery = req.query.or.map(function(item) {
         return JSON.parse(item)
@@ -119,9 +120,8 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
       //either replace by https://www.npmjs.com/package/expression-eval, or parse the url yourself. I put this way to save time for the first version of claim system demo
       query= eval(req.query.query)[0]
     }
-
+    console.log('query', query)
     var claims = await models.ClaimInfo.findAll({
-      attributes: ['id', 'policyNumber', 'patientFirstName', 'patientLastName', 'policyVip', 'gop', 'createdAt','status'],
       where: query,
       include: [{
         model:models.ClaimInfoVisits,
@@ -147,36 +147,44 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   const claimID = base64url.decode(req.query.id)
   models.ClaimInfo.findByPk(claimID, {
 
-    include: [{
+    include: [
+      {
       model:models.ClaimInfoVisits,
       //attributes: ['id', 'billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper','billingUsdper',],
-      include: [
-        {
-          model: models.BillingInfoOtherName
-        },
-        {
-          model: models.ClaimInfoVisitsFiles
-        },
-        {
-          model: models.BillingInfoFiles,
-        },
-        {
-          model: models.DocumentsFiles
-        },
-        {
-          model: models.BillingInfo,
-          include: [
-            {
-              model:models.BenefitCategories,
-            },
-            {
-              model:models.BenefitSubCategories,
-            }
-          ]
-        },
+        include: [
+          {
+            model: models.BillingInfoOtherName
+          },
+          {
+            model: models.ClaimInfoVisitsFiles
+          },
+          {
+            model: models.BillingInfoFiles,
+          },
+          {
+            model: models.DocumentsFiles
+          },
+          {
+            model: models.BillingInfo,
+            include: [
+              {
+                model:models.BenefitCategories,
+              },
+              {
+                model:models.BenefitSubCategories,
+              }
+            ]
+          },
 
-      ],
-    }],
+        ],
+      }, 
+      {
+        model:models.Acessment,
+      },
+      {
+        model:models.Comments,
+      }
+    ],
   }).then (claim => {
     res.send(claim)
   }).catch(e => {
