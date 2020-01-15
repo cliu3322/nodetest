@@ -8,6 +8,7 @@ const authenticate = (req, res, next) => {
 	jsonwebtoken.verify(token, secretKey, (error, decoded) => {
 		if (error) {
 			console.log(error)
+			res.send({ error: 'token varified failed' })
 			next({ error: 'token varified failed' });
 		} else {
 
@@ -17,6 +18,7 @@ const authenticate = (req, res, next) => {
 			} else {
 				console.log('token expired')
 				next({ error: 'token expired' });
+				res.send({ error: 'token expired' })
 			}
 		}
 	});

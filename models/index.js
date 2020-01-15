@@ -25,7 +25,7 @@
 
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo2
-
+//node_modules/.bin/sequelize model:generate --name PaymentReceipts --attributes name:string,url:string,receivedAt:DATE
 
 
 //legacy

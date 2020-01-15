@@ -90,7 +90,7 @@ router.post('/decision', function(req, res, next) {
   console.log(req.body)
   models.Comments.create(req.body.decision).then(comment => {
     models.ClaimInfo.findByPk(req.body.decision.claimInfoId).then(item => {
-      return item.update(req.body.status)
+      return item.update({ approvedAt: Date.now(), ...req.body.status})
     })
     res.json(comment);
   }).catch( e => {

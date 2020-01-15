@@ -41,6 +41,8 @@ module.exports = (sequelize, DataTypes) => {
     PaidAt: DataTypes.DATE,
     paymentStatus: DataTypes.STRING,
     isPaid: DataTypes.BOOLEAN,
+    sendToAccountantAt: DataTypes.DATE,
+    isSendToAccountant: DataTypes.BOOLEAN,
   }, {});
   ClaimInfo.associate = function(models) {
     // associations can be defined here

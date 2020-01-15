@@ -4,6 +4,18 @@ var models  = require('../models');
 var base64url = require('base64url');
 const sequelize = require('sequelize');
 /* GET home page. */
+
+const awaitErorrHandlerFactory = middleware => {
+
+  return async (req, res, next) => {
+    try {
+      await middleware(req, res, next);
+    } catch (err) {
+      next(err);
+    }
+  };
+};
+
 router.get('/', function(req, res, next) {
     console.log(req.query)
 
@@ -12,6 +24,27 @@ router.get('/', function(req, res, next) {
         message: 'succcesful',
     });
 });
+
+
+router.post('/upload', awaitErorrHandlerFactory(async (req, res, next) => {
+  var form = new formidable.IncomingForm();
+  form.uploadDir = "../upload/temp";
+  form.keepExtensions = true;
+  form.parse(req);
+  form.on('error', err =>  {
+      res.sendStatus(500)
+  });
+
+  form.on('file', (name, file) =>  {
+
+  });
+
+  form.on('file', (name, file) =>  {
+    res.send({name:file.name, path:file.path });
+  });
+
+
+}));
 
 router.get('/toBePaid', async function(req, res, next) {
     var response = {};
@@ -78,11 +111,11 @@ router.get('/paid', async function(req, res, next) {
 });
 
 
-router.get('/updateStatus', function(req, res, next) {
+router.get('/sendToAccountant', function(req, res, next) {
 
  
   models.ClaimInfo.update(
-    {isPaid: true}, 
+    {isSendToAccountant: true, sendToAccountantAt: Date.now()}, 
     {
       where: {
         [sequelize.Op.and]: [
@@ -104,6 +137,30 @@ router.get('/updateStatus', function(req, res, next) {
 
 });
 
+
+router.post('/paymentReceipt', function(req, res, next) {
+
+  console.log(req.body)
+  models.PaymentReceipts.bulkCreate(req.body).then(paymentReceipt => {
+    res.json(paymentReceipt);
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+    //retrieve patient, we should build patient db in the future
+
+});
+
+router.get('/paymentReceipt', function(req, res, next) {
+  models.PaymentReceipts.findAll({}).then(paymentReceipts => {
+    res.json(paymentReceipts);
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+    //retrieve patient, we should build patient db in the future
+
+});
 
 
 module.exports = router;
