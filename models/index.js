@@ -31,7 +31,7 @@
 //legacy
 
 //node_modules/.bin/sequelize model:generate --name Test --attributes name:STRING
-
+//node_modules/.bin/sequelize model:generate --name PaymentToAccountant --attributes sendAt:DATE,url:STRING,name:STRING
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');

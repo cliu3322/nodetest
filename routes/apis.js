@@ -126,7 +126,7 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
 
 router.use('/report',report)
 
-router.use('/test', [authenticate, authError],test)
+router.use('/test',test)
 
 router.use('/claim', claim);
 

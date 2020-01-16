@@ -86,6 +86,9 @@ if (!fs.existsSync('../upload')){
     fs.mkdirSync('../upload');
 }
 
+if (!fs.existsSync('../upload/paymentReport')){
+  fs.mkdirSync('../upload/paymentReport');
+}
 
 if (!fs.existsSync('../upload/temp')){
     fs.mkdirSync('../upload/temp');

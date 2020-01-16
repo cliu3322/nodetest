@@ -27,6 +27,7 @@
     "crawler": "^1.2.1",
     "d3-array": "^2.3.1",
     "debug": "~2.6.9",
+    "exceljs": "^3.5.0",
     "express": "~4.16.1",
     "express-fileupload": "^1.1.5",
     "formidable": "^1.2.1",
