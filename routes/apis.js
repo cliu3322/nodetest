@@ -19,6 +19,7 @@ var comments = require('./comments');
 var ravendb = require('./ravendb');
 var files = require('./files');
 var payment = require('./payment')
+var users = require('./users')
 
 //var benefitCategories = require('./benefitCategories')
 
@@ -144,7 +145,9 @@ router.use('/ravendb', [authenticate, authError], ravendb)
 
 router.use('/comments', [authenticate, authError], comments)
 
-router.use('/payment', payment);
+router.use('/payment', [authenticate, authError], payment);
+
+router.use('/users', [authenticate, authError], users)
 
 
 //router.use('/benefitCategories',benefitCategories)

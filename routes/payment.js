@@ -6,6 +6,10 @@ var base64url = require('base64url');
 const Excel = require('exceljs');
 const sequelize = require('sequelize');
 const moment = require('moment');
+
+var hbs = require('nodemailer-express-handlebars');
+var MailConfig = require('../email/config');
+var gmailTransport = MailConfig.GmailTransport;
 /* GET home page. */
 
 const awaitErorrHandlerFactory = middleware => {
@@ -252,9 +256,51 @@ router.get('/sendToAccountant', async function(req, res, next) {
     //console.log('../upload/paymentReport/'+fileName+'.xlsx')
     models.PaymentToAccountant.create({SendAt:Date.now(), url:'../upload/paymentReport/'+fileName+'.xlsx', name:fileName}).then(paymentToAccountant => {
       //send email
-      res.send(paymentToAccountant)
+      var email = {
+        from: 'vip@whitehouse.org', // sender address
+        to: 'cliu3322@hawaii.edu'+','+'eric.sqlserver@gmail.com', // list of receivers
+        subject: 'payment to accountant', // Subject line
+        template: 'test',
+        context: {
+        },
+        attachments: [{
+            filename: fileName+'.xlsx',
+            path: '../upload/paymentReport/'+fileName+'.xlsx',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      }
+      gmailTransport.sendMail(email).then(result => {
+        res.send(result)
+      }).catch(e=> {
+        console.log(e);
+        res.status(500).send(e)
+      });
+      
     })
   })
 });
+
+router.get('/resendToAccountant', function(req, res, next) {
+  let email = {
+    from: 'vip@whitehouse.org', // sender address
+    to: 'cliu3322@hawaii.edu'+','+'eric.sqlserver@gmail.com', // list of receivers
+    subject: 'payment to accountant', // Subject line
+    template: 'test',
+    context: {
+    },
+    attachments: [{
+        filename: req.query.name+'.xlsx',
+        path: '../upload/paymentReport/'+req.query.name+'.xlsx',
+        cid: 'unique@nodemailer.com' //same cid value as in the html img src
+    }]
+  }
+  gmailTransport.sendMail(email).then(result => {
+    res.send(result)
+  }).catch(e=> {
+    console.log(e);
+    res.status(500).send(e)
+  });
+});
+
 
 module.exports = router;
