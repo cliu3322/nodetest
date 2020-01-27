@@ -240,7 +240,7 @@ router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
 router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   var claim = req.body
-  models.ClaimInfo.count({policyNumber:claim.policyNumber}).then(policyCount => {
+  models.ClaimInfo.count({where:{policyNumber:claim.policyNumber}}).then(policyCount => {
     claim.id = claim.policyNumber+"-"+(policyCount+1)
     claim.status='pr'
     models.ClaimInfo.create(claim).then(result => {

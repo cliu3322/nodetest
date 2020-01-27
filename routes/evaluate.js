@@ -53,13 +53,37 @@ router.post('/assessment',async function(req, res, next) {
   res.send({commentResult,assessmentResult ,claimResult})
 });
 
-router.get('/patientClaims', function(req, res, next) {
+router.get('/policyClaims', function(req, res, next) {
   const claimID = req.query.id
-
-  console.log(claimID)
-  models.ClaimInfo.findByPk(claimID, {attributes: ['patientFirstName', 'patientLastName','patientDob']}).then(claim => {
+  models.ClaimInfo.findByPk(claimID, {attributes: [ 'policyNumber']}).then(claim => {
     models.ClaimInfo.findAll({
       where: {
+        policyNumber: claim.policyNumber,
+        status:{[sequelize.Op.or]:['ca', 'cp', 'cc']}
+      },
+      attributes: ['id', 'createdAt','cause'],
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'billingRate',],
+        include: [
+          {
+            model: models.BillingInfo,
+          },
+        ],
+      }],
+    }).then(patientClaims => {
+      res.send(patientClaims)
+    })
+  })
+  //retrieve patient, we should build patient db in the future
+});
+
+router.get('/patientClaims', function(req, res, next) {
+  const claimID = req.query.id
+  models.ClaimInfo.findByPk(claimID, {attributes: ['patientFirstName', 'patientLastName','patientDob', 'policyNumber']}).then(claim => {
+    models.ClaimInfo.findAll({
+      where: {
+        policyNumber: claim.policyNumber,
         patientFirstName: claim.patientFirstName,
         patientLastName: claim.patientLastName,
         patientDob:claim.patientDob, 

@@ -319,6 +319,38 @@ router.get('/USDRejected', function (req, res, next) {
   })
 })
 
+
+router.get('/USDConsideration', function (req, res, next) {
+  models.ClaimInfo.findAll({
+    attributes: [
+      [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0), 'month'], 
+      [sequelize.fn('SUM', sequelize.col('[ClaimInfoVisits->BillingInfos].approved')), 'sum']
+    ],
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: [],
+      include: [{
+        model:models.BillingInfo,
+        attributes: []
+      }],
+    }],
+    where: {
+      [sequelize.Op.and]: {
+        [sequelize.Op.or]: [{status: 'cc'}], 
+        createdAt:{[sequelize.Op.between]:  [ moment(req.query['0']), moment(req.query['1'])]}
+      }
+    },
+    group : [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+    order: [[sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0)]],
+    raw: true
+  })
+  .then(bill => res.send(bill))
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+})
+
 router.get('/approvedClaimedCountByType', function (req, res, next) {
   models.ClaimInfo.findAll({
     attributes: ['policyType', [sequelize.fn('COUNT', 'policyType'), 'policyTypeCount']],
