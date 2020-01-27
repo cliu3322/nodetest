@@ -40,4 +40,33 @@ router.put('/user', function(req, res, next) {
   })
 });
 
+router.get('/settings', function(req, res, next) {
+    models.SharedSettings.findAll({})
+    .then(settings => {
+      res.send(settings);
+    })
+    .catch(e => {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    })
+});
+
+router.put('/settings', function(req, res, next) {
+  console.log('req.query', req.query)
+  models.SharedSettings.findOne({
+    where: {
+        name: req.query.name,
+    }
+  })
+  .then(setting => {
+    setting.update(req.query).then(updatedSetting => {
+      res.send(updatedSetting);
+    })
+  })
+  .catch(e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+});
+
 module.exports = router;
