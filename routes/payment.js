@@ -7,7 +7,9 @@ const Excel = require('exceljs');
 const sequelize = require('sequelize');
 const moment = require('moment');
 var MailConfig = require('../email/config');
+var hbs = require('nodemailer-express-handlebars');
 var gmailTransport = MailConfig.GmailTransport;
+MailConfig.ViewOption(gmailTransport,hbs);
 /* GET home page. */
 
 const awaitErorrHandlerFactory = middleware => {
@@ -178,7 +180,6 @@ router.get('/paymentReceipt', function(req, res, next) {
 
 
 router.get('/sendToAccountant', async function(req, res, next) {
-  console.log('asdfads1111111111111f')
   var response = {};
   try {
     var claims = await models.ClaimInfo.findAll({
@@ -258,18 +259,27 @@ router.get('/sendToAccountant', async function(req, res, next) {
     //console.log('../upload/paymentReport/'+fileName+'.xlsx')
     models.PaymentToAccountant.create({SendAt:Date.now(), url:'../upload/paymentReport/'+fileName+'.xlsx', name:fileName}).then(paymentToAccountant => {
       //send email
+      
       var email = {
         from: 'vip@whitehouse.org', // sender address
-        to: 'cliu3322@hawaii.edu'+','+'eric.sqlserver@gmail.com', // list of receivers
+        to: setting.accountantEmail+','+setting.forwardEmail, // list of receivers
         subject: 'payment to accountant', // Subject line
-        template: 'test',
+        template: 'payment',
         context: {
+          reportDate: new Date(Number(fileName)),
         },
-        attachments: [{
+        attachments: [
+          {
             filename: fileName+'.xlsx',
             path: '../upload/paymentReport/'+fileName+'.xlsx',
             cid: 'unique@nodemailer.com' //same cid value as in the html img src
-        }]
+          },
+          {
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@unique' //same cid value as in the html img src
+          }
+        ]
       }
       gmailTransport.sendMail(email).then(result => {
         res.send(result)
@@ -282,19 +292,29 @@ router.get('/sendToAccountant', async function(req, res, next) {
   })
 });
 
-router.get('/resendToAccountant', function(req, res, next) {
+router.get('/resendToAccountant', async function(req, res, next) {
+  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+
   let email = {
     from: 'vip@whitehouse.org', // sender address
-    to: 'cliu3322@hawaii.edu'+','+'eric.sqlserver@gmail.com', // list of receivers
+    to: setting.accountantEmail+','+setting.forwardEmail, // list of receivers
     subject: 'payment to accountant', // Subject line
-    template: 'test',
+    template: 'payment',
     context: {
+      reportDate: new Date(Number(req.query.name)),
     },
-    attachments: [{
+    attachments: [
+      {
         filename: req.query.name+'.xlsx',
         path: '../upload/paymentReport/'+req.query.name+'.xlsx',
         cid: 'unique@nodemailer.com' //same cid value as in the html img src
-    }]
+      }, 
+      {
+        filename: 'a.png',
+        path: __dirname +'/../views/img/a.png',
+        cid: 'unique@unique' //same cid value as in the html img src
+      }
+    ]
   }
   gmailTransport.sendMail(email).then(result => {
     res.send(result)

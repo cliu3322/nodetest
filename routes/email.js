@@ -66,6 +66,33 @@ router.get('/', async function (req, res, next) {
   });
 })
 
+
+router.get('/test', async function (req, res, next) {
+  MailConfig.ViewOption(gmailTransport,hbs);
+  var email = {
+    from: 'vip@whitehouse.org', // sender address
+    to: 'cliu3322@hawaii.edu'+',eric.sqlserver@gmail.com', // list of receivers
+    subject: 'Your claim has been registered', // Subject line
+    template: 'payment',
+    context: {
+      ucn:'result.id',
+    },
+    attachments: [{
+        filename: 'a.png',
+        path: __dirname +'/../views/img/a.png',
+        cid: 'unique@nodemailer.com' //same cid value as in the html img src
+    }]
+  }
+  console.log(email)
+  gmailTransport.sendMail(email).then(result => {
+    res.send(result)
+  }).catch(e=> {
+    console.log(e);
+    res.status(500).send(e)
+  });
+})
+
+
 router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
   console.log(req.body)
   var result = await main().catch(console.error);
