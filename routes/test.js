@@ -22,18 +22,11 @@ const awaitErorrHandlerFactory = middleware => {
 //https://stackoverflow.com/questions/28206680/using-group-by-and-joins-in-sequelize
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
-  var claims = await models.ClaimInfo.findAll({
-    attributes: ['id', 'policyNumber', [models.sequelize.fn('sum', models.sequelize.col('ClaimInfoVisits.id')), 'total_cost']],
-    where: req.query,
-    include: [{
-      model:models.ClaimInfoVisits,
-      attributes: [],
-    }],
-    group: ['ClaimInfo.id', 'ClaimInfo.policyNumber'],
-    raw: false
-  });
+  console.log('aiyamaya')
+  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+  console.log(setting)
 
-  res.send(claims)
+  res.send(setting)
 
 
 })

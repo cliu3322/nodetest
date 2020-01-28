@@ -41,8 +41,12 @@ router.put('/user', function(req, res, next) {
 });
 
 router.get('/settings', function(req, res, next) {
-    models.SharedSettings.findAll({})
+    models.SharedSettings.findOne({
+      limit: 1,
+      order: [ [ 'createdAt', 'DESC' ]]
+    })
     .then(settings => {
+      console.log('settings___________________', settings)
       res.send(settings);
     })
     .catch(e => {
@@ -52,12 +56,8 @@ router.get('/settings', function(req, res, next) {
 });
 
 router.put('/settings', function(req, res, next) {
-  console.log('req.query', req.query)
-  models.SharedSettings.findOne({
-    where: {
-        name: req.query.name,
-    }
-  })
+  console.log(req.body)
+  models.SharedSettings.create(req.body)
   .then(setting => {
     setting.update(req.query).then(updatedSetting => {
       res.send(updatedSetting);

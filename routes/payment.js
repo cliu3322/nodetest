@@ -2,12 +2,10 @@
 var express = require('express');
 var router = express.Router();
 var models  = require('../models');
-var base64url = require('base64url');
+
 const Excel = require('exceljs');
 const sequelize = require('sequelize');
 const moment = require('moment');
-
-var hbs = require('nodemailer-express-handlebars');
 var MailConfig = require('../email/config');
 var gmailTransport = MailConfig.GmailTransport;
 /* GET home page. */
@@ -249,7 +247,11 @@ router.get('/sendToAccountant', async function(req, res, next) {
     "Date Approved"]
   worksheet.addRow(header)
   worksheet.addRows(result);
-  worksheet.protect('password')
+
+  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+
+  console.log('setting.paymentPasswordsetting----------------', setting.paymentPassword)
+  worksheet.protect(setting.paymentPassword)
   const fileName = Date.now()
   workbook.xlsx.writeFile('../upload/paymentReport/'+fileName+'.xlsx').then(() => {
     //send email, insert payment to Account file, send res

@@ -24,7 +24,7 @@
 
 
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo
-//node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo2
+//node_modules/.bin/sequelize migration:create --name add_colomn_to_shared-settings
 //node_modules/.bin/sequelize model:generate --name PaymentReceipts --attributes name:string,url:string,receivedAt:DATE
 
 
@@ -33,7 +33,7 @@
 //node_modules/.bin/sequelize model:generate --name Test --attributes name:STRING
 //node_modules/.bin/sequelize model:generate --name PaymentToAccountant --attributes sendAt:DATE,url:STRING,name:STRING
 
-//node_modules/.bin/sequelize model:generate --name SharedSettings --attributes name:STRING,value:STRING
+//node_modules/.bin/sequelize model:generate --name SharedSettings --attributes modifiedBy:INTEGER,accountantEmail:STRING,paymentPassword:STRING
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
