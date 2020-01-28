@@ -69,4 +69,14 @@ router.put('/settings', function(req, res, next) {
   })
 });
 
+router.get('/exchangeRateDate', function(req, res, next) {
+  models.ExchangeRate.findOne({})
+  .then(exchangeRate => {
+    res.send(exchangeRate);
+  })
+  .catch(e => {
+    res.sendStatus(500).send(e)
+  })
+});
+
 module.exports = router;
