@@ -40,7 +40,7 @@ const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 
 //Before modify this line of code, consult with Eric first
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'azure';
 const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
@@ -48,11 +48,6 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  // config.logging = function (str) {
-  //       // do your own logging
-  //       console.log(str)
-  // }
-  console.log(config)
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
