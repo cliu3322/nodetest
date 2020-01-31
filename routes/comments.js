@@ -26,8 +26,13 @@ router.get('/comments',async function(req, res, next) {
   models.Comments.findAll({
     where:{claimInfoId:claimID},
     order: [['createdAt', 'DESC']],
+    include: [
+      {
+        attributes: ['firstName','lastName'],
+        model: models.User,
+      },
+    ],
   }).then(comments => {
-
     res.json(comments);
   }).catch( e => {
     console.log(e)
@@ -42,9 +47,23 @@ router.get('/comments',async function(req, res, next) {
 router.post('/comments',async function(req, res, next) {
   // const claimID = base64url.decode(req.query.id)
 
-  models.Comments.create(req.body).then(comment => {
-
-    res.json(comment);
+  models.Comments.create(req.body)
+  .then(comment => {
+    models.Comments.findAll({
+      where:{claimInfoId:comment.claimInfoId},
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+          attributes: ['firstName','lastName'],
+          model: models.User,
+        },
+      ],
+    }).then(comments => {
+      res.json(comments);
+    }).catch( e => {
+      console.log(e)
+      res.sendStatus(500).send(e)
+    })
   }).catch( e => {
     console.log(e)
     res.sendStatus(500).send(e)

@@ -107,11 +107,13 @@ router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
       attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
     }],
   })
+  const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+  console.log(setting.forwardEmail)
   const result = claim.toJSON()
   MailConfig.ViewOption(gmailTransport,hbs);
   var email = {
     from: 'vip@whitehouse.org', // sender address
-    to: 'cliu3322@hawaii.edu'+','+result.contactEmail, // list of receivers
+    to: setting.forwardEmail+','+result.contactEmail, // list of receivers
     subject: 'Your claim has been registered', // Subject line
     template: 'red_v3',
     context: {

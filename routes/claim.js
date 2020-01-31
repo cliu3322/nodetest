@@ -237,6 +237,16 @@ router.get('/claimById', awaitErorrHandlerFactory(async (req, res, next) => {
   }
 }));
 
+router.get('/firstClaim', awaitErorrHandlerFactory(async (req, res, next) => {
+  try {
+    const claim = await models.ClaimInfo.findOne({where:req.query,limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+    res.json(claim);
+  } catch(e) {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  }
+}));
+
 router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   var claim = req.body

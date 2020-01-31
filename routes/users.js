@@ -46,7 +46,6 @@ router.get('/settings', function(req, res, next) {
       order: [ [ 'createdAt', 'DESC' ]]
     })
     .then(settings => {
-    
       res.send(settings);
     })
     .catch(e => {
