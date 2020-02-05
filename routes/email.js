@@ -4,10 +4,8 @@
 var express = require('express')
 var router = express.Router()
 var models = require('../models')
-const nodemailer = require('nodemailer');
 var hbs = require('nodemailer-express-handlebars');
-var fs = require('fs');
-
+const moment = require('moment');
 var MailConfig = require('../email/config');
 var gmailTransport = MailConfig.GmailTransport;
 
@@ -35,7 +33,7 @@ router.get('/', async function (req, res, next) {
       attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
     }],
   })
-  const result = claim.toJSON()
+  const result = claim.toJSON().map(item => ({id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),}))
   MailConfig.ViewOption(gmailTransport,hbs);
   var email = {
     from: 'vip@whitehouse.org', // sender address
@@ -57,7 +55,7 @@ router.get('/', async function (req, res, next) {
         cid: 'unique@nodemailer.com' //same cid value as in the html img src
     }]
   }
-  console.log(email)
+  console.log(result.ClaimInfoVisits)
   gmailTransport.sendMail(email).then(result => {
     res.send(result)
   }).catch(e=> {
@@ -94,9 +92,48 @@ router.get('/test', async function (req, res, next) {
 
 
 router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.body)
-  var result = await main().catch(console.error);
-  res.send(result)
+  const claim = await models.ClaimInfo.findByPk('PIH/2017/22743485-C4', {
+    include: [{
+      model:models.ClaimInfoVisits,
+      attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
+    }],
+  })
+  
+  const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+  const result = claim.toJSON()
+  let visits = result.ClaimInfoVisits.map(item => ({
+    id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, 
+    dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),
+    patient: result.contactFirstName + ' ' + result.contactLastName,
+  }))
+  MailConfig.ViewOption(gmailTransport,hbs);
+  var email = {
+    from: 'vip@whitehouse.org', // sender address
+    to: setting.forwardEmail+','+result.contactEmail, 
+    subject: 'Your claim has been registered', // Subject line
+    template: 'red_v3',
+    context: {
+      ucn:result.id,
+      visits:visits,
+      contactName:result.contactFirstName + ' ' + result.contactLastName,
+      patientName: result.patientFirstName + ' ' + result.patientLastName,
+      cause: result.cause,
+      email: "tariqul.islam.rony@gmail.com",
+      address: req.body.claimID
+    },
+    attachments: [{
+        filename: 'a.png',
+        path: __dirname +'/../views/img/a.png',
+        cid: 'unique@nodemailer.com' //same cid value as in the html img src
+    }]
+  }
+  console.log(result.ClaimInfoVisits)
+  gmailTransport.sendMail(email).then(result => {
+    res.send(result)
+  }).catch(e=> {
+    console.log(e);
+    res.status(500).send(e)
+  });
 }))
 
 router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
@@ -122,7 +159,7 @@ router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
       contactName:result.contactFirstName + ' ' + result.contactLastName,
       patientName: result.patientFirstName + ' ' + result.patientLastName,
       cause: result.cause,
-      email: "tariqul.islam.rony@gmail.com",
+      email: result.contactEmail,
       address: req.body.claimID
     },
     attachments: [{

@@ -145,6 +145,7 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
 
 router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
   const claimID = base64url.decode(req.query.id)
+
   models.ClaimInfo.findByPk(claimID, {
 
     include: [
@@ -186,6 +187,7 @@ router.get('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
       }
     ],
   }).then (claim => {
+    //console.log(claim)
     res.send(claim)
   }).catch(e => {
     console.log(e)

@@ -22,11 +22,21 @@ const awaitErorrHandlerFactory = middleware => {
 //https://stackoverflow.com/questions/28206680/using-group-by-and-joins-in-sequelize
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
-  console.log('aiyamaya')
-  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
-  console.log(setting)
 
+  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+  console.log(process.env.NODE_ENV)
+  
   res.send(setting)
+
+
+})
+
+router.get('/env', async function (req, res, next) {
+
+  let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+  console.log(process.env)
+  
+  res.send(process.env)
 
 
 })
