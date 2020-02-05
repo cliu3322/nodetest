@@ -10,7 +10,7 @@ const util = require('util');
 //https://stackoverflow.com/questions/30128701/parse-form-value-with-formidable-to-filename
 var fs = require('fs');
 var path = require('path');
-var d3 = require('d3-array');
+const uuidv4 = require('uuid/v4');
 const sequelize = require('sequelize');
 var Promise = require("bluebird");
 var base64url = require('base64url');
@@ -252,12 +252,23 @@ router.get('/firstClaim', awaitErorrHandlerFactory(async (req, res, next) => {
 router.post('/claim', awaitErorrHandlerFactory(async (req, res, next) => {
 
   var claim = req.body
-  models.ClaimInfo.count({where:{policyNumber:claim.policyNumber}}).then(policyCount => {
-    claim.id = claim.policyNumber+"-"+(policyCount+1)
+  models.ClaimInfo.count({where:{policyNumber:claim.policyNumber}}).then(async policyCount => {
+
+    let existingClaim 
+    let id = 1
+      existingClaim = await models.ClaimInfo.findByPk(claim.policyNumber+"-"+(policyCount+id))
+    if (existingClaim)
+      id = uuidv4()
+  
+    claim.id = claim.policyNumber+"-"+(policyCount+id)
+    
     claim.status='pr'
     models.ClaimInfo.create(claim).then(result => {
       res.send(result)
-    }).catch(e => {throw e})
+    }).catch(e => {
+      console.error('asdfasdf',e)
+      throw e
+    })
   }).catch(e => {
     console.log(e)
     res.sendStatus(500).send(e)
