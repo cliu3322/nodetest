@@ -8,8 +8,9 @@ var humanname  = require('humanname');
 
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.json({ firstName: 'constant' })
+router.get('/', async function(req, res, next) {
+  const data = await models.vClaimInfo.findAll({});
+  res.json(data)
 });
 
 router.get('/claiminfo', async function(req, res, next) {
@@ -77,7 +78,9 @@ router.get('/rejected', async function(req, res, next) {
     return await Promise.all(
       response.map(
         async item => {
-
+          if((!item.policyNumber)||(!item.id)) {
+            console.log(item.id)
+          }
           try {
             var policyType
             var typeList = ["TLS", "LI", "MM", "ST", "CO", "FC"];
@@ -85,10 +88,12 @@ router.get('/rejected', async function(req, res, next) {
               policyType = item.policyNumber.split('/')[2]
             } else if ( item.policyNumber === '-') {
               policyType = '-'
+              console.log(item.id)
+              console.log('policyNumber -', item.policyNumber)
             } else if ( item.policyNumber.split('/')[0] === 'PIH') {
               policyType = 'PIH'
             } else {
-              console.log(item)
+              console.log(item.id)
             }
             //
             //patientName
@@ -103,87 +108,101 @@ router.get('/rejected', async function(req, res, next) {
             //
             //reimbursementCurrency
             var parsedReimbursementResult
-
+            var RCExchangeRate
+            var RCExchangeRateDate
             var parseReimbursement =  item.ReimbursementCurrency.split('(')
             if (parseReimbursement.length===1) {
               if (parseReimbursement[0] === '-') {
+                console.log(item.id, 'no reimbursement~~~~~~~~~~')
                 parsedReimbursementResult = null;
               } else {
                 var exchangeRate = await models.ExchangeRate.findOne({where: {name:(parseReimbursement[0])}})
                 if (exchangeRate !== null) {
-                  //console.log(exchangeRate.code)
+                  console.log('1')
+                  //console.log('node exchage rate reimbursement')
+                  
+                  //declined
+                  RCExchangeRate = exchangeRate.rate
+                  RCExchangeRateDate = exchangeRate.data
                   parsedReimbursementResult =exchangeRate.code
                 } else {
+                  console.log('-------ReimbursementCurrency special')
                   var exchangeRate2 = await models.ExchangeRate.findOne({where: {code:parseReimbursement[0]}})
                   if (exchangeRate2 !== null) {
+                    RCExchangeRate = exchangeRate2.rate
+                    RCExchangeRateDate = exchangeRate2.data
                     parsedReimbursementResult = exchangeRate2.code
                   } else {
+                    console.log(parseReimbursement[0])
                     if (item.ReimbursementCurrency === 'Myanmar Kyat') {
+                      console.log(item.id)
                       parsedReimbursementResult = 'MMK'
                     } else {
-                      console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                      console.log(item.ReimbursementCurrency)
-                    }
-
-                  }
-
-                }
-              }
-
-              //console.log(exchangeRate)
-            }
-            else if (parseReimbursement.length===2) {
-              //console.log(parseReimbursement[1].split(')')[0])
-              parsedReimbursementResult = parseReimbursement[1].split(')')[0]
-            } else {
-              console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-              console.log(parseReimbursement)
-            }
-
-
-            //billingCurrency
-            var parsedBillingResult
-
-            var parseReimbursement =  item.billingCurrency.split('(')
-            if (parseReimbursement.length===1) {
-              if (parseReimbursement[0] === '-') {
-                parsedBillingResult = null;
-              } else {
-                var exchangeRate = await models.ExchangeRate.findOne({where: {name:(parseReimbursement[0])}})
-                if (exchangeRate !== null) {
-                  //console.log(exchangeRate.code)
-                  parsedBillingResult =exchangeRate.code
-                } else {
-                  var exchangeRate2 = await models.ExchangeRate.findOne({where: {code:parseReimbursement[0]}})
-                  if (exchangeRate2 !== null) {
-                    parsedBillingResult = exchangeRate2.code
-                  } else {
-                    if (item.billingCurrency === 'Myanmar Kyat') {
-                      parsedBillingResult = 'MMK'
-                    } else if (item.billingCurrency === 'Ukraine Hryvnia') {
-                      parsedBillingResult = 'UAH'
-                    }
-                     else {
-                      console.log('$$$$$$$$$$$')
+                      console.log('~~~~~~~~~ReimbursementCurrency')
                       console.log(item.id)
-                      console.log(item.billingCurrency)
-                      parsedBillingResult = null
                     }
 
                   }
 
                 }
               }
-
-              //console.log(exchangeRate)
             }
             else if (parseReimbursement.length===2) {
               //console.log(parseReimbursement[1].split(')')[0])
-              parsedBillingResult = parseReimbursement[1].split(')')[0]
+              
+              parsedReimbursementResult = parseReimbursement[1].split(')')[0]
+              var exchangeRate3 = await models.ExchangeRate.findOne({where: {code:parsedReimbursementResult}})
+              RCExchangeRate = exchangeRate3.rate
+              RCExchangeRateDate = exchangeRate3.data
             } else {
               console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
               console.log(parseReimbursement)
             }
+
+            console.log(RCExchangeRate)
+            // //billingCurrency
+            // var parsedBillingResult
+
+            // var parseReimbursement =  item.billingCurrency.split('(')
+            // if (parseReimbursement.length===1) {
+            //   if (parseReimbursement[0] === '-') {
+            //     parsedBillingResult = null;
+            //   } else {
+            //     var exchangeRate = await models.ExchangeRate.findOne({where: {name:(parseReimbursement[0])}})
+            //     if (exchangeRate !== null) {
+            //       //console.log(exchangeRate.code)
+            //       parsedBillingResult =exchangeRate.code
+            //     } else {
+            //       var exchangeRate2 = await models.ExchangeRate.findOne({where: {code:parseReimbursement[0]}})
+            //       if (exchangeRate2 !== null) {
+            //         parsedBillingResult = exchangeRate2.code
+            //       } else {
+            //         if (item.billingCurrency === 'Myanmar Kyat') {
+            //           parsedBillingResult = 'MMK'
+            //         } else if (item.billingCurrency === 'Ukraine Hryvnia') {
+            //           parsedBillingResult = 'UAH'
+            //         }
+            //          else {
+            //           console.log('$$$$$$$$$$$')
+            //           console.log(item.id)
+            //           console.log(item.billingCurrency)
+            //           parsedBillingResult = null
+            //         }
+
+            //       }
+
+            //     }
+            //   }
+
+            //   //console.log(exchangeRate)
+            // }
+            // else if (parseReimbursement.length===2) {
+            //   //console.log(parseReimbursement[1].split(')')[0])
+            //   parsedBillingResult = parseReimbursement[1].split(')')[0]
+            // } else {
+            //   console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            //   console.log(parseReimbursement)
+            // }
 
             //RCExchangeRate
             if (item.approvedUSD && item.approvedReimbursement) {
@@ -196,33 +215,35 @@ router.get('/rejected', async function(req, res, next) {
             item.gop = item.bankName === 'GOP'?true:false
 
 
-            //for billingInfo
-            var billingInfos = []
+            // //for billingInfo
+            // var billingInfos = []
 
-            for (var i = 1; i < 42; i++) {
-              if (item[i] !== null && item[i]>0) {
-                if (item[i] >  67295000) {
-                  console.log('*************************************************')
-                  console.log(item.id)
-                }
-                billingInfos.push({billingSubCat:i, value:item[i]})
-              }
+            // for (var i = 1; i < 42; i++) {
+            //   if (item[i] !== null && item[i]>0) {
+            //     if (item[i] >  67295000) {
+            //       console.log('*****Too big')
+            //       console.log(i)
+            //       console.log(item.id)
+            //     }
+            //     billingInfos.push({billingSubCat:i, value:item[i]})
+            //   }
 
-            }
-            if (item.billingTotalUSD/item.claimedTotalUSD >  6729500) {
-              console.log('*************************************************')
-              console.log(item.id)
-            }
+            // }
+            // if (item.billingTotalUSD/item.claimedTotalUSD >  6729500) {
+            //   console.log('********** Rate not right')
+            //   console.log(item.id)
+            // }
 
             //
+            //console.log(parsedReimbursementResult)
              var newItem = {
-              id: item.id+'-'+item.policyNumber,
+              id: (item.policyNumber+'-'+item.id),
               createdBy:1,
               policyNumber:item.policyNumber,
               policyType:policyType,
               patientFirstName:patientFirstName,
               patientLastName:patientLastName,
-              cause:item.cuase,
+              cause:item.cause,
               createdAt:item.createdAt,
               reimbusementCurrency:parsedReimbursementResult,
               contactEmail:item.email,
@@ -239,19 +260,21 @@ router.get('/rejected', async function(req, res, next) {
               decisionDate: item.decisionDate,
               decisionReason: item.decisionReason,
               gop:item.gop,
-              RCExchangeRate:item.RCExchangeRate,
-              ClaimInfoVisits: [{
-                claimInfoId: item.id+'-'+item.policyNumber,
-                visitNumber: 1,
-                dateOfAdmissionVisit: item.hospitalDate,
-                doctorName: item.doctorName,
-                hospitalDate: item.hospitalDate,
-                hospitalOrClinicCountry: item.hospitalLocation,
-                billingCurrency: parsedBillingResult,
-                createdAt: item.createdAt,
-                billingRate: isNaN(item.billingTotalUSD/item.claimedTotalUSD)?null:item.billingTotalUSD/item.claimedTotalUSD,
-                BillingInfos : billingInfos
-              }]
+              RCExchangeRate:RCExchangeRate,
+              RCExchangeRateDate:RCExchangeRateDate,
+              status:'cd'
+              // ClaimInfoVisits: [{
+              //   claimInfoId: item.id+'-'+item.policyNumber,
+              //   visitNumber: 1,
+              //   dateOfAdmissionVisit: item.hospitalDate,
+              //   doctorName: item.doctorName,
+              //   hospitalDate: item.hospitalDate,
+              //   hospitalOrClinicCountry: item.hospitalLocation,
+              //   billingCurrency: parsedBillingResult,
+              //   createdAt: item.createdAt,
+              //   billingRate: isNaN(item.billingTotalUSD/item.claimedTotalUSD)?null:item.billingTotalUSD/item.claimedTotalUSD,
+              //   BillingInfos : billingInfos
+              // }]
             }
             return Promise.resolve(newItem)
           }
@@ -269,14 +292,14 @@ router.get('/rejected', async function(req, res, next) {
   //
 
 
-  models.ClaimInfo.bulkCreate(results,{
-        include: [{
-          model: models.ClaimInfoVisits,
-          include: [{
-            model: models.BillingInfo,
-          }],
-        }],
-  })
+  // models.ClaimInfo.bulkCreate(results,{
+  //       include: [{
+  //         model: models.ClaimInfoVisits,
+  //         include: [{
+  //           model: models.BillingInfo,
+  //         }],
+  //       }],
+  // })
   res.json(results)
 
     //res.json('results');
@@ -342,6 +365,7 @@ router.get('/approved', async function(req, res, next) {
                var parseReimbursement =  item.ReimbursementCurrency.split('(')
                if (parseReimbursement.length===1) {
                  if (parseReimbursement[0] === '-') {
+                   console.log(item.id)
                    parsedReimbursementResult = null;
                  } else {
                    var exchangeRate = await models.ExchangeRate.findOne({where: {name:(parseReimbursement[0])}})
@@ -497,19 +521,19 @@ router.get('/approved', async function(req, res, next) {
                decisionReason: item.decisionReason,
                gop:item.gop,
                RCExchangeRate:isNaN(item.RCExchangeRate)?null:item.RCExchangeRate,
-               //RCExchangeRate:null,
-               ClaimInfoVisits: [{
-                 claimInfoId: item.id+'-'+item.policyNumber,
-                 visitNumber: 1,
-                 dateOfAdmissionVisit: item.hospitalDate,
-                 doctorName: item.doctorName,
-                 hospitalDate: item.hospitalDate,
-                 hospitalOrClinicCountry: item.hospitalLocation,
-                 billingCurrency: parsedBillingResult,
-                 createdAt: item.createdAt,
-                 billingRate: billingUsdper,
-                 BillingInfos : billingInfos
-               }]
+              //  //RCExchangeRate:null,
+              //  ClaimInfoVisits: [{
+              //    claimInfoId: item.id+'-'+item.policyNumber,
+              //    visitNumber: 1,
+              //    dateOfAdmissionVisit: item.hospitalDate,
+              //    doctorName: item.doctorName,
+              //    hospitalDate: item.hospitalDate,
+              //    hospitalOrClinicCountry: item.hospitalLocation,
+              //    billingCurrency: parsedBillingResult,
+              //    createdAt: item.createdAt,
+              //    billingRate: billingUsdper,
+              //    BillingInfos : billingInfos
+              //  }]
              }
              return Promise.resolve(newItem)
            }
@@ -790,6 +814,145 @@ router.get('/legacy',async function(req, res, next) {
            }],
          }],
    })
+   res.json(results)
+
+});
+
+
+router.get('/v1reject', async function(req, res, next) {
+
+  const response = await models.vClaimInfo.findAll({});
+
+  const getData = async () => {
+    return await Promise.all(
+      response.map(
+        async item => {
+          try {
+
+            //policyType
+            let policyType
+            switch(item.policyType) {
+              case 'Standard':
+                policyType = "ST"
+                break;
+              case 'Thailand Long Stay':
+                policyType = "TLS"
+                break;
+              case 'Fully Comprehensive':
+                policyType = "FC"
+                break;
+              case 'Major Medical':
+                policyType = "MM"
+                break;
+              case 'Life Insurance':
+                policyType = "LI"
+                break;
+              case 'Comprehensive':
+                policyType = "CO"
+                break;
+              default:
+                policyType = null
+            }
+
+            //patientName
+            var patientFirstName, patientLastName
+            if (item.name === null) {
+              patientFirstName =  null;
+              patientLastName = null;
+            } else {
+              patientFirstName = humanname.parse(item.name).firstName;
+              patientLastName = humanname.parse(item.name).lastName;
+            }
+
+
+            //reimbursementCurrency
+
+
+            var parsedReimbursementResult
+            if (item.reimbusementCurrency=== null) {
+              parsedReimbursementResult = null
+            } else {
+              var parseReimbursement =  item.reimbusementCurrency.split('(')
+              if (parseReimbursement.length===1) {
+                if (parseReimbursement[0] === '-') {
+                  parsedReimbursementResult = null;
+                } else {
+                  var exchangeRate = await models.ExchangeRate.findOne({where: {name:(parseReimbursement[0])}})
+                  if (exchangeRate !== null) {
+                    //console.log(exchangeRate.code)
+                    parsedReimbursementResult =exchangeRate.code
+                  } else {
+                    var exchangeRate2 = await models.ExchangeRate.findOne({where: {code:parseReimbursement[0]}})
+                    if (exchangeRate2 !== null) {
+                      parsedReimbursementResult = exchangeRate2.code
+                    } else {
+                      if (item.reimbusementCurrency === 'Myanmar Kyat') {
+                        parsedReimbursementResult = 'MMK'
+                      } else {
+                        console.log('parsedReimbursementResult')
+                        console.log(item.ID)
+                      }
+
+                    }
+
+                  }
+                }
+                //console.log(exchangeRate)
+              }
+              else if (parseReimbursement.length===2) {
+                //console.log(parseReimbursement[1].split(')')[0])
+                parsedReimbursementResult = parseReimbursement[1].split(')')[0]
+              } else {
+                console.log('parsedReimbursementResult')
+                console.log(item.ID)
+              }
+            }            
+            //gop
+            item.gop = item.bankName === 'Y'?true:false
+
+            //
+            var newItem = {
+              id: item.ID.trim(),
+              createdBy:1,
+              policyNumber:item.policyNumber?item.policyNumber.trim():null,
+              policyType:policyType?policyType.trim():null,
+              patientFirstName:patientFirstName?patientFirstName.trim():null,
+              patientLastName:patientLastName?patientLastName.trim():null,
+              cause:item.cuase?item.cuase.trim():null,
+              createdAt:item.createdAt,
+              reimbusementCurrency:parsedReimbursementResult?parsedReimbursementResult.trim():null,
+              contactEmail:item.email?item.email.trim():null,
+              contactPhoneNumber: item.contactPhoneNumber?item.contactPhoneNumber:null,
+              contactHomeAddress:item.contactHomeAddress?item.contactHomeAddress.trim():null,
+              bankAccountNumber: item.bankAccount?item.bankAccount.trim():null,
+              accountHoldersName: item.accountHoldersName?item.accountHoldersName.trim():null,
+              bankName: item.bankName?item.bankName.trim():null,
+              bankAddress: item.bankAddress?item.bankAddress.trim():null,
+              swift: item.swift?item.swift.trim():null,
+              ibanCodeSortCode: item.ibanCodeSortCode?item.ibanCodeSortCode.trim():null,
+              status: item.status?item.status.trim():null,
+              decisioner: item.rejector?item.rejector.trim():null,
+              decisionDate: item.decisionDate,
+              decisionReason: item.decisionReason,
+              gop:item.gop,
+              RCExchangeRate:isNaN(item.RCExchangeRate)?null:item.RCExchangeRate,
+            }
+            return Promise.resolve(newItem)
+          }
+          catch(e) {
+            console.log(e)
+            return Promise.reject(e)
+          }
+        }
+      )
+    )
+  }
+  let results
+
+    results = await getData()
+
+   //
+
    res.json(results)
 
 });

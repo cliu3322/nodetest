@@ -133,7 +133,7 @@ router.use('/claim', claim);
 
 router.use('/evaluate', [authenticate, authError], evaluate);
 
-router.use('/constant', [authenticate, authError], constant);
+router.use('/constant', constant);
 
 router.use('/email', emailRouter);
 
