@@ -16,7 +16,8 @@
     "database": "claims",
     "host": "regency-claims.database.windows.net",
     "dialect": "mssql",
-    "dialectOptions":{"options": {"encrypt": true}}
+    "dialectOptions":{"options": {"encrypt": true, "requestTimeout": 30000000}},
+    "logging": false
   },
   "test": {
     "username": "root",

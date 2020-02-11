@@ -6,10 +6,7 @@
 //https://flaviocopes.com/express-send-response/
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
-
 var apis = require('./routes/apis');
-
 var createError = require('http-errors');
 var express = require('express');
 var compression = require('compression')
@@ -40,6 +37,7 @@ app.use(cors())
 
 app.use('/users', usersRouter);
 app.use('/api', apis);
+
 //app.use('/upload', upload);
 app.use('/upload', express.static(path.join(__dirname, '../upload')))
 
@@ -48,6 +46,8 @@ app.use('/upload', express.static(path.join(__dirname, '../upload')))
 
 
 app.use(express.static(path.join(__dirname, 'build')));
+
+
 
 app.get('/*', function(req, res) {
   console.debug('* is triggered')
@@ -105,5 +105,8 @@ if (!fs.existsSync('../upload/billinginfo')){
 if (!fs.existsSync('../upload/documents')){
     fs.mkdirSync('../upload/documents');
 }
+
+
+//require('./script.js');
 
 module.exports = app;
