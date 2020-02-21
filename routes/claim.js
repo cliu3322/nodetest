@@ -677,25 +677,25 @@ router.get('/test', awaitErorrHandlerFactory(async (req, res, next) => {
 
 router.put('/rate', awaitErorrHandlerFactory(async (req, res, next) => {
   models.ClaimInfo.findByPk(req.query.id, {include: {model: models.ClaimInfoVisits}}).then(claimInfo => {
-    //console.log(claimInfo.ClaimInfoVisits.update)
     models.ExchangeRate.findByPk(claimInfo.reimbusementCurrency).then(exchangeRate => {
       if (exchangeRate === null)
         res.sendStatus(500).send({err:'no reimbusement Currency'})
       claimInfo.update({ RCExchangeRate: exchangeRate.rate, RCExchangeRateDate:exchangeRate.updatedAt}).then(chaimInfo => {
         Promise.each(claimInfo.ClaimInfoVisits,
           (visit) => {
-            console.log('1')
-            return models.ExchangeRate.findByPk(visit.billingCurrency).then(async exchangeRate => {
-              return await visit.update({ billingRate: exchangeRate.rate, currencyDate:exchangeRate.updatedAt})
+            return models.ExchangeRate.findByPk(visit.billingCurrency).then(async billingExchangeRate => {
+              billingExchangeRate.rate = billingExchangeRate.rate.toFixed(5)
+              return await visit.update({ billingRate: billingExchangeRate.rate, currencyDate:billingExchangeRate.updatedAt})
+              .catch(e => {console.log(e);throw e})
             })
           }
         )
-        .then(result => { res.send(chaimInfo)})
+        .then(result => { res.send(chaimInfo)}).catch(e => {console.log(e);res.sendStatus(500).send(e)})
       })
-    })
+    }).catch(e => {console.log(e);res.sendStatus(500).send(e)})
 
 
-  }).catch(e => {console.log(e)})
+  }).catch(e => {console.log(e);res.sendStatus(500).send(e)})
 }));
 
 

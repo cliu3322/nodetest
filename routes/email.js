@@ -137,44 +137,52 @@ router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
 }))
 
 router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
-  console.log(req.body)
-  const claim = await models.ClaimInfo.findByPk(req.body.claimID, {
-    include: [{
-      model:models.ClaimInfoVisits,
-      attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
-    }],
-  })
-  const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
-  console.log(setting.forwardEmail)
-  const result = claim.toJSON()
-  MailConfig.ViewOption(gmailTransport,hbs);
-  var email = {
-    from: 'vip@whitehouse.org', // sender address
-    to: setting.forwardEmail+','+result.contactEmail, // list of receivers
-    subject: 'Your claim has been registered', // Subject line
-    template: 'red_v3',
-    context: {
-      ucn:result.id,
-      visits:result.ClaimInfoVisits,
-      contactName:result.contactFirstName + ' ' + result.contactLastName,
-      patientName: result.patientFirstName + ' ' + result.patientLastName,
-      cause: result.cause,
-      email: result.contactEmail,
-      address: req.body.claimID
-    },
-    attachments: [{
-        filename: 'a.png',
-        path: __dirname +'/../views/img/a.png',
-        cid: 'unique@nodemailer.com' //same cid value as in the html img src
-    }]
+  console.log('req.body',req.body)
+  try {
+    const claim = await models.ClaimInfo.findByPk(req.body.claimID, {
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
+      }],
+    })
+    const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+    
+    const result = claim.toJSON()
+    console.log('result', result)
+    MailConfig.ViewOption(gmailTransport,hbs);
+    var email = {
+      from: 'vip@whitehouse.org', // sender address
+      to: setting.forwardEmail+','+result.contactEmail, // list of receivers
+      subject: 'Your claim has been registered', // Subject line
+      template: 'red_v3',
+      context: {
+        ucn:result.id,
+        visits:result.ClaimInfoVisits,
+        contactName:result.contactFirstName + ' ' + result.contactLastName,
+        patientName: result.patientFirstName + ' ' + result.patientLastName,
+        cause: result.cause,
+        email: result.contactEmail,
+        address: req.body.claimID
+      },
+      attachments: [{
+          filename: 'a.png',
+          path: __dirname +'/../views/img/a.png',
+          cid: 'unique@nodemailer.com' //same cid value as in the html img src
+      }]
+    }
+    console.log('email', email)
+    gmailTransport.sendMail(email).then(result => {
+      console.log('result', result)
+      res.send(result)
+    }).catch(e=> {
+      console.log(e);
+      res.status(500).send(e)
+    });
+
   }
-  console.log(email)
-  gmailTransport.sendMail(email).then(result => {
-    res.send(result)
-  }).catch(e=> {
+  catch (e) {
     console.log(e);
-    res.status(500).send(e)
-  });
+  }
 }))
 
 
