@@ -34,6 +34,7 @@
 //node_modules/.bin/sequelize model:generate --name PaymentToAccountant --attributes sendAt:DATE,url:STRING,name:STRING
 
 //node_modules/.bin/sequelize model:generate --name SharedSettings --attributes modifiedBy:INTEGER,accountantEmail:STRING,paymentPassword:STRING
+//node_modules/.bin/sequelize model:generate --name PaymentReceiptsToAccount --attributes PaymentToAccountantsId:INTEGER,url:STRING,name:STRING
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');

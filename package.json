@@ -48,6 +48,7 @@
     "rimraf": "^2.6.2",
     "sequelize": "^5.12.3",
     "sequelize-cli": "^5.5.0",
+    "sequelize-hierarchy": "^2.0.4",
     "spdy": "^4.0.1",
     "sqlite3": "^4.0.9",
     "tedious": "^6.2.0",

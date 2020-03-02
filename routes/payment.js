@@ -2,13 +2,14 @@
 var express = require('express');
 var router = express.Router();
 var models  = require('../models');
-
+const formidable = require('formidable')
 const Excel = require('exceljs');
 const sequelize = require('sequelize');
 const moment = require('moment');
 var MailConfig = require('../email/config');
 var hbs = require('nodemailer-express-handlebars');
 var gmailTransport = MailConfig.GmailTransport;
+
 MailConfig.ViewOption(gmailTransport,hbs);
 /* GET home page. */
 
@@ -143,8 +144,15 @@ router.get('/paid', async function(req, res, next) {
 // });
 
 router.get('/reportToAccountant', function(req, res, next) {
-  models.PaymentToAccountant.findAll({}).then(paymentToAccountant => {
-    res.json(paymentToAccountant);
+
+  models.PaymentToAccountant.findAll({
+    include: [{// Notice `include` takes an ARRAY
+      model: models.PaymentReceiptsToAccount,
+      attributes: ['id', 'name', 'url'],
+    }], 
+    
+  }).then(paymentToAccountant => {
+    res.send(paymentToAccountant);
   }).catch( e => {
     console.log(e)
     res.sendStatus(500).send(e)
@@ -175,6 +183,48 @@ router.get('/paymentReceipt', function(req, res, next) {
     res.sendStatus(500).send(e)
   })
     //retrieve patient, we should build patient db in the future
+
+});
+
+
+router.post('/paymentReceipt2', function(req, res, next) {
+  try {
+    var form = new formidable.IncomingForm();
+    form.uploadDir = "../upload/paymentSlipt";
+    form.keepExtensions = true;
+    form.multiples = true;
+    form.parse(req);
+  
+    var files = []
+    var data = {}
+    form.on('file', function (name, file){
+      files.push(file)
+    });
+    form.on('field', function(name, value) {
+      data[name]= value;
+    });
+  
+    form.on('end',async function() {
+      try {
+  
+        if(files.length > 1)
+          throw new Error('file length is longer than 1');
+  
+        console.log({name:files[0].name, url: files[0].path, data: data})
+        const fileRecord = await models.PaymentReceiptsToAccount.create({PaymentToAccountantsId:data.PaymentToAccountantsId,name:files[0].name, url: files[0].path})
+        res.send(fileRecord);
+      } catch(e) {
+        console.log(e)
+        res.sendStatus(500)
+      }
+    });
+  } catch (error) {
+    console.log(error)
+  }
+
+});
+
+router.get('/paymentReceipt2', function(req, res, next) {
 
 });
 

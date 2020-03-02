@@ -8,7 +8,7 @@
     "database": "newdb",
     "host": "localhost",
     "dialect": "mssql",
-    "logging": false
+    "_logging": false
   },
   "azure": {
     "username": "test",

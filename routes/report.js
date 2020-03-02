@@ -289,10 +289,11 @@ router.get('/USDApproved', function (req, res, next) {
 })
 
 router.get('/USDRejected', function (req, res, next) {
+  console.log(req.query)
   models.ClaimInfo.findAll({
     attributes: [
       [sequelize.fn('DATEADD',sequelize.literal('MONTH'), sequelize.fn('DATEDIFF',sequelize.literal('MONTH'), 0, sequelize.col('ClaimInfo.createdAt')),0), 'month'], 
-      [sequelize.fn('SUM', sequelize.col('[ClaimInfoVisits->BillingInfos].approved')), 'sum']
+      [sequelize.fn('SUM', sequelize.col('[ClaimInfoVisits->BillingInfos].value')), 'sum']
     ],
     include: [{
       model:models.ClaimInfoVisits,

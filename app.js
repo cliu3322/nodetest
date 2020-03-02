@@ -107,6 +107,11 @@ if (!fs.existsSync('../upload/documents')){
 }
 
 
+if (!fs.existsSync('../upload/paymentSlipt')){
+  fs.mkdirSync('../upload/paymentSlipt');
+}
+
+
 //require('./script.js');
 
 module.exports = app;

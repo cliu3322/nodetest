@@ -6,7 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING
   }, {});
   PaymentToAccountant.associate = function(models) {
-    // associations can be defined here
+    PaymentToAccountant.hasMany(models.PaymentReceiptsToAccount,
+      {  foreignKey: 'PaymentToAccountantsId',  targetKey: 'id'}
+    )
   };
   return PaymentToAccountant;
 };
