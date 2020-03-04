@@ -10,6 +10,14 @@
     "dialect": "mssql",
     "_logging": false
   },
+  "claim": {
+    "username": "test",
+    "password": "test",
+    "database": "claim",
+    "host": "localhost",
+    "dialect": "mssql",
+    "_logging": false
+  },
   "azure": {
     "username": "test",
     "password": "Baza7183!",

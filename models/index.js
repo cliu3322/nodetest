@@ -21,7 +21,7 @@
 
 //node_modules/.bin/sequelize db:migrate --env development
 //node_modules/.bin/sequelize db:migrate --env azure
-
+//node_modules/.bin/sequelize db:migrate --env claim
 
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_shared-settings
@@ -41,7 +41,7 @@ const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 
 //Before modify this line of code, consult with Eric first
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'azure';
 const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
