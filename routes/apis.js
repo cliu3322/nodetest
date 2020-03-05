@@ -70,6 +70,8 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
   		response.error = 'Not found';
   	} else if (!bcrypt.compareSync(password, user.dataValues.password)) {
       response.error = 'password and username do not match';
+    } else if (!user.dataValues.active) {
+      response.error = 'The use has not been approved yet.';
     } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
       response.token = jsonwebtoken.sign(
         {
@@ -104,7 +106,7 @@ router.post('/signup', awaitErorrHandlerFactory(async (req, res, next) => {
     	response.error = 'User name not available! Please change another one.';
     } else {
       var hash = bcrypt.hashSync(password, 8);
-        const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname });
+        const userinput = await models.User.create({ userName: username, password: hash, email:email, firstName:firstname, lastName:lastname, active:false, role:1 });
 
 
         response.token = jsonwebtoken.sign(

@@ -14,7 +14,6 @@ router.get('/user', function(req, res, next) {
       res.send(user);
     })
     .catch(e => {
-      console.log(e)
       res.sendStatus(500).send(e)
     })
     
@@ -23,7 +22,7 @@ router.get('/user', function(req, res, next) {
 });
 
 router.put('/user', function(req, res, next) {
-  console.log('req.query.newPassword', req.query.newPassword)
+
   if(req.query.newPassword) {
     var hash = bcrypt.hashSync(req.query.newPassword, 8);
     req.query.password = hash
@@ -35,7 +34,7 @@ router.put('/user', function(req, res, next) {
     })
   })
   .catch(e => {
-    console.log(e)
+   
     res.sendStatus(500).send(e)
   })
 });
@@ -72,6 +71,18 @@ router.get('/exchangeRateDate', function(req, res, next) {
   models.ExchangeRate.findOne({})
   .then(exchangeRate => {
     res.send(exchangeRate);
+  })
+  .catch(e => {
+    res.sendStatus(500).send(e)
+  })
+});
+
+
+router.get('/users', function(req, res, next) {
+  console.log('aasdfasdfsda')
+  models.User.findAll({attributes: ['id', 'email', 'firstName', 'lastName', 'role', 'active']})
+  .then(users => {
+    res.send(users);
   })
   .catch(e => {
     res.sendStatus(500).send(e)
