@@ -59,11 +59,12 @@ router.post('/checkServerVariable', awaitErorrHandlerFactory(async (req, res, ne
 }));
 
 router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
-
+  console.log('ip', req.ip)
 	const { username, password } = req.body;
 	const response = {};
 	// You can use DB checking here
   try {
+    await models.IP.create({ address: req.ip });
 	  const user = await models.User.findOne({ where: {userName: username} });
 
   	if (user === null) {

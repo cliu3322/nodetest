@@ -24,7 +24,7 @@ const awaitErorrHandlerFactory = middleware => {
 router.get('/', async function (req, res, next) {
 
   let setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
-  console.log(process.env.NODE_ENV)
+  console.log(req.ip)
   
   res.send(setting)
 

@@ -21,7 +21,7 @@
 
 //node_modules/.bin/sequelize db:migrate --env development
 //node_modules/.bin/sequelize db:migrate --env azure
-//node_modules/.bin/sequelize db:migrate --env claim
+//yarn 
 
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_claimInfo
 //node_modules/.bin/sequelize migration:create --name add_colomn_to_shared-settings
@@ -35,6 +35,7 @@
 
 //node_modules/.bin/sequelize model:generate --name SharedSettings --attributes modifiedBy:INTEGER,accountantEmail:STRING,paymentPassword:STRING
 //node_modules/.bin/sequelize model:generate --name PaymentReceiptsToAccount --attributes PaymentToAccountantsId:INTEGER,url:STRING,name:STRING
+//node_modules/.bin/sequelize model:generate --name IP --attributes address:STRING
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
