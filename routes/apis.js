@@ -64,7 +64,7 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
 	const response = {};
 	// You can use DB checking here
   try {
-    await models.IP.create({ address: req.ip });
+   
 	  const user = await models.User.findOne({ where: {userName: username} });
 
   	if (user === null) {
@@ -74,6 +74,7 @@ router.post('/login', awaitErorrHandlerFactory(async (req, res, next) => {
     } else if (!user.dataValues.active) {
       response.error = 'The use has not been approved yet.';
     } else if (user !== null && user !== '' && bcrypt.compareSync(password, user.dataValues.password)) {
+      await models.IP.create({ address: req.ip });
       response.token = jsonwebtoken.sign(
         {
           expiredAt: new Date().getTime() + expiredAfter,

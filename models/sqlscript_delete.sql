@@ -1,34 +1,4 @@
-/****** Script for SelectTopNRows command from SSMS  ******/
-SELECT TOP (1000) *
-  FROM [claim].[dbo].Dirties where id =  'D183'
-
-  SELECT [21]+[23]+[24]
-  FROM [claim].[dbo].Dirties where id =  'C6569'
-
-/****** duplicate ******/
-SELECT id, COUNT(*), status occurrences
-FROM [dirty]
-GROUP BY 
-[id], status
-HAVING COUNT(*) > 1;
-
-/****** duplicate ******/
-SELECT id, COUNT(*) occurrences
-FROM Dirties
-GROUP BY 
-[id]
-HAVING COUNT(*) > 1;
-
-DELETE TOP (1) FROM Dirties
-WHERE
-    id = 'B4871'
-
-
-UPDATE Dirties
-SET status = 'Approved. To be Paid'
-WHERE id = 'T4788a';
-
-/****** remove duplicate ******/
+/*duplicate record*/
 
 WITH cte 
      AS (SELECT [id], [policytype], [policynumber], [patientname], [status2], [hospitaldate], [cause], [hospitalname], [hospitallocation], [doctorname], [billingcurrency], 
@@ -55,8 +25,29 @@ DELETE FROM cte
 WHERE  row_num > 1; 
 
 
-/****** Script for pre ******/
-UPDATE [dbo].[BillingInfos]
-SET billingCat = t2.categoryId
-FROM  [dbo].[BillingInfos]
-INNER JOIN [dbo].[BenefitSubCategories] as t2 ON [dbo].[BillingInfos].billingSubCat = t2.id
+
+/*delete the reject one record*/
+
+DELETE TOP (1) FROM Dirties WHERE id = 'A305' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'B5186' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'B651' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'B652' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'C3581' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'C3582' and status = 'Rejected'
+
+
+DELETE TOP (1) FROM Dirties WHERE id = 'B4862' 
+DELETE TOP (1) FROM Dirties WHERE id = 'B4871' 
+
+DELETE TOP (1) FROM Dirties WHERE id = 'B4827' and bankAddress = 'n/a'
+
+
+UPDATE Dirties SET id = 'C9227a' WHERE id = 'C9227' and status = 'Rejected';
+UPDATE Dirties SET id = 'D992a' WHERE id = 'D992' and status = 'Rejected';
+UPDATE Dirties SET id = 'U5033a' WHERE id = 'U5033' and status = 'Rejected';
+
+DELETE TOP (1) FROM Dirties WHERE id = 'D433' and Reject_USD is null
+UPDATE Dirties SET status = 'Rejected' WHERE id = 'U5033a' and status = 'Rejected';
+
+
+UPDATE Dirties SET approved_reimbusement = 2578404.00 WHERE id = 'A119'

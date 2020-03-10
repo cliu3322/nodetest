@@ -8,7 +8,7 @@
     "database": "newdb",
     "host": "localhost",
     "dialect": "mssql",
-    "_logging": false
+    "logging": false
   },
   "claim": {
     "username": "test",
@@ -16,7 +16,7 @@
     "database": "claim",
     "host": "localhost",
     "dialect": "mssql",
-    "_logging": false
+    "logging": false
   },
   "azure": {
     "username": "test",
