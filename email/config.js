@@ -10,6 +10,7 @@ let path = require('path');
 //   }
 // });
 
+module.exports.from = 'claim@regencyforexpat.com';
 
 module.exports.GmailTransport = nodemailer.createTransport({
   host: 'smtp.sendgrid.net',

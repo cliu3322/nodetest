@@ -3,6 +3,11 @@ var router = express.Router();
 var models  = require('../models');
 var base64url = require('base64url');
 const sequelize = require('sequelize');
+var MailConfig = require('../email/config');
+var hbs = require('nodemailer-express-handlebars');
+var gmailTransport = MailConfig.GmailTransport;
+
+MailConfig.ViewOption(gmailTransport,hbs);
 /* GET home page. */
 router.get('/', function(req, res, next) {
   console.log(req.query)
@@ -124,6 +129,49 @@ router.post('/decision', function(req, res, next) {
 
 
 });
+
+
+router.post('/test', function(req, res, next) {
+  // const claimID = base64url.decode(req.query.id)
+
+  console.log(MailConfig.from)
+  models.Comments.create(req.body.decision).then(comment => {
+    models.ClaimInfo.findByPk(req.body.decision.claimInfoId).then(item => {
+      item.update({ approvedAt: Date.now(), ...req.body.status}).then(updated => {
+        var email = {
+          from: MailConfig.from, // sender address
+          to:  'eric.liu.bkk@gmail.com, '+ req.body.decision.contactEmail,// list of receivers
+          subject: 'decision', // Subject line
+          template: 'decision',
+          context: {
+            value: req.body.decision.email,
+          },
+          attachments: [
+            {
+              filename: 'a.png',
+              path: __dirname +'/../views/img/a.png',
+              cid: 'unique@unique' //same cid value as in the html img src
+            }
+          ]
+        }
+      
+        gmailTransport.sendMail(email).then(result => {
+          res.send(result)
+        }).catch(e=> {
+          console.log(e);
+          res.status(500).send(e)
+        });
+      })
+    })
+  }).catch( e => {
+    console.log(e)
+    res.sendStatus(500).send(e)
+  })
+
+
+
+});
+
 
 
 module.exports = router;

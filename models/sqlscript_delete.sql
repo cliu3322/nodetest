@@ -31,7 +31,7 @@ WHERE  row_num > 1;
 DELETE TOP (1) FROM Dirties WHERE id = 'A305' and status = 'Rejected'
 DELETE TOP (1) FROM Dirties WHERE id = 'B5186' and status = 'Rejected'
 DELETE TOP (1) FROM Dirties WHERE id = 'B651' and status = 'Rejected'
-DELETE TOP (1) FROM Dirties WHERE id = 'B652' and status = 'Rejected'
+DELETE TOP (1) FROM Dirties WHERE id = 'B652' and status = ''
 DELETE TOP (1) FROM Dirties WHERE id = 'C3581' and status = 'Rejected'
 DELETE TOP (1) FROM Dirties WHERE id = 'C3582' and status = 'Rejected'
 
@@ -51,3 +51,15 @@ UPDATE Dirties SET status = 'Rejected' WHERE id = 'U5033a' and status = 'Rejecte
 
 
 UPDATE Dirties SET approved_reimbusement = 2578404.00 WHERE id = 'A119'
+
+DELETE TOP (1) FROM Dirties WHERE id = 'S4308'
+
+DELETE TOP (1) FROM Dirties WHERE id = 'E1000'
+
+DELETE TOP (1) FROM Dirties WHERE id = 'B123'
+DELETE TOP (1) FROM Dirties WHERE id = 'B124'
+DELETE TOP (1) FROM Dirties WHERE id = 'B126'
+DELETE TOP (1) FROM Dirties WHERE id = 'B167'
+DELETE TOP (1) FROM Dirties WHERE id = 'A4919'
+
+DELETE TOP (1) FROM Dirties WHERE id = 'C9371'

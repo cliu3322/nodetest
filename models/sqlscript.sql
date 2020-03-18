@@ -1,13 +1,20 @@
 /****** Script for SelectTopNRows command from SSMS  ******/
-SELECT TOP (1000) *
-  FROM [claim].[dbo].Dirties where id =  'D183'
+SELECT SUM([1]+[2]+[3]+[4]+[5]+[6]+[7]+[8]+[9]+
+[10]+[11]+[12]+[13]+[14]+[15]+[16]+[17]+[18]+[19]+
+[20]+[21]+[22]+[23]+[24]+[25]+[26]+[27]+[28]+[29]+
+[30]+[31]+[32]+[33]+[34]+[35]+[36]+[37]+[38]+
+[40]+[41])
+  FROM [claim].[dbo].Dirties where id =  'B173'
 
-  SELECT [21]+[23]+[24]
-  FROM [claim].[dbo].Dirties where id =  'C6569'
+  SELECT TOP (1000) *
+  FROM [claim].[dbo].Dirties where id =  'C726'
+
+  SELECT (claimedTotalUSD-([1]+[3]+[7]))
+  FROM [claim].[dbo].Dirties where id =  'G4977'
 
 /****** duplicate ******/
 SELECT id, COUNT(*), status occurrences
-FROM [dirty]
+FROM Dirties
 GROUP BY 
 [id], status
 HAVING COUNT(*) > 1;
@@ -21,7 +28,7 @@ HAVING COUNT(*) > 1;
 
 DELETE TOP (1) FROM Dirties
 WHERE
-    id = 'B4871'
+    id = 'E1000'
 
 
 UPDATE Dirties
@@ -60,3 +67,5 @@ UPDATE [dbo].[BillingInfos]
 SET billingCat = t2.categoryId
 FROM  [dbo].[BillingInfos]
 INNER JOIN [dbo].[BenefitSubCategories] as t2 ON [dbo].[BillingInfos].billingSubCat = t2.id
+
+

@@ -9,8 +9,11 @@ Server admin login: regency-claims, Baza7183!
 . run constant/validation
 . don't forget to run prescript
 
-
+Check status first
 
 
 no id A4919 null
 no id C9371 null
+
+
+
