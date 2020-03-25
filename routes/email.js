@@ -92,49 +92,57 @@ router.get('/test', async function (req, res, next) {
 
 
 router.get('/send', awaitErorrHandlerFactory(async (req, res, next) => {
-  const claim = await models.ClaimInfo.findByPk('PIH/2017/22743485-C4', {
-    include: [{
-      model:models.ClaimInfoVisits,
-      attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
-    }],
-  })
-  
-  const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
-  const result = claim.toJSON()
-  let visits = result.ClaimInfoVisits.map(item => ({
-    id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, 
-    dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),
-    patient: result.contactFirstName + ' ' + result.contactLastName,
-  }))
-  MailConfig.ViewOption(gmailTransport,hbs);
-  var email = {
-    from: 'vip@whitehouse.org', // sender address
-    to: setting.forwardEmail+','+result.contactEmail, 
-    subject: 'Your claim has been registered', // Subject line
-    template: 'red_v3',
-    context: {
-      ucn:result.id,
-      visits:visits,
-      contactName:result.contactFirstName + ' ' + result.contactLastName,
-      patientName: result.patientFirstName + ' ' + result.patientLastName,
-      cause: result.cause,
-      email: "tariqul.islam.rony@gmail.com",
-      address: req.body.claimID
-    },
-    attachments: [{
-        filename: 'a.png',
-        path: __dirname +'/../views/img/a.png',
-        cid: 'unique@nodemailer.com' //same cid value as in the html img src
-    }]
+  try {
+    const claim = await models.ClaimInfo.findByPk('sdf-5', {
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName',],
+      }],
+    })
+    const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+    if(!(claim && setting)) {
+      res.status(500).send({error: 'no record'})
+    } else {
+      const result = claim.toJSON()
+      let visits = result.ClaimInfoVisits.map(item => ({
+        id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, 
+        dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),
+        patient: result.contactFirstName + ' ' + result.contactLastName,
+      }))
+      MailConfig.ViewOption(gmailTransport,hbs);
+      var email = {
+        from: MailConfig.from, // sender address
+        to: setting.forwardEmail+','+result.contactEmail, 
+        subject: 'Your claim has been registered', // Subject line
+        template: 'red_v3',
+        context: {
+          ucn:result.id,
+          visits:visits,
+          contactName:result.contactFirstName + ' ' + result.contactLastName,
+          patientName: result.patientFirstName + ' ' + result.patientLastName,
+          cause: result.cause,
+          email: "tariqul.islam.rony@gmail.com",
+          address: req.body.claimID
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      }
+      console.log(result.ClaimInfoVisits)
+      var emailRes = await gmailTransport.sendMail(email)
+      res.send(emailRes)
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(error)
   }
-  console.log(result.ClaimInfoVisits)
-  gmailTransport.sendMail(email).then(result => {
-    res.send(result)
-  }).catch(e=> {
-    console.log(e);
-    res.status(500).send(e)
-  });
+
 }))
+
+
 
 router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
   console.log('req.body',req.body)
@@ -146,43 +154,189 @@ router.post('/send', awaitErorrHandlerFactory(async (req, res, next) => {
       }],
     })
     const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
-    
-    const result = claim.toJSON()
-    console.log('result', result)
-    MailConfig.ViewOption(gmailTransport,hbs);
-    var email = {
-      from: 'vip@whitehouse.org', // sender address
-      to: setting.forwardEmail+','+result.contactEmail, // list of receivers
-      subject: 'Your claim has been registered', // Subject line
-      template: 'red_v3',
-      context: {
-        ucn:result.id,
-        visits:result.ClaimInfoVisits,
-        contactName:result.contactFirstName + ' ' + result.contactLastName,
-        patientName: result.patientFirstName + ' ' + result.patientLastName,
-        cause: result.cause,
-        email: result.contactEmail,
-        address: req.body.claimID
-      },
-      attachments: [{
-          filename: 'a.png',
-          path: __dirname +'/../views/img/a.png',
-          cid: 'unique@nodemailer.com' //same cid value as in the html img src
-      }]
+    if(!(claim && setting)) {
+      res.status(500).send({error: 'no record'})
+    } else {
+      const result = claim.toJSON()
+      MailConfig.ViewOption(gmailTransport,hbs);
+      var email = {
+        from: 'vip@whitehouse.org', // sender address
+        to: setting.forwardEmail+','+result.contactEmail, // list of receivers
+        subject: 'Your claim has been registered', // Subject line
+        template: 'red_v3',
+        context: {
+          ucn:result.id,
+          visits:result.ClaimInfoVisits,
+          contactName:result.contactFirstName + ' ' + result.contactLastName,
+          patientName: result.patientFirstName + ' ' + result.patientLastName,
+          cause: result.cause,
+          email: result.contactEmail,
+          address: req.body.claimID
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      }
+      console.log('email', email)
+      gmailTransport.sendMail(email).then(result => {
+        console.log('result', result)
+        res.send(result)
+      }).catch(e=> {
+        console.log(e);
+        res.status(500).send(e)
+      });
     }
-    console.log('email', email)
-    gmailTransport.sendMail(email).then(result => {
-      console.log('result', result)
-      res.send(result)
-    }).catch(e=> {
-      console.log(e);
-      res.status(500).send(e)
-    });
 
   }
   catch (e) {
     console.log(e);
   }
+}))
+
+
+
+router.get('/decision_approved', awaitErorrHandlerFactory(async (req, res, next) => {
+  try {
+    const claim = await models.ClaimInfo.findByPk('RIH/YYYY/XX/11111111-15', {
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName','billingCurrency', 'billingRate'],
+        include: [{
+          model:models.BillingInfo,
+          attributes: ['value', 'approved'],
+        }],
+      }],
+    })
+    const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+    if(!(claim && setting)) {
+      res.status(500).send({error: 'no record'})
+    } else {
+      const result = claim.toJSON()
+      const status = result.status
+      let visits = result.ClaimInfoVisits.map(item => ({
+        id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, 
+        dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),
+        patient: result.contactFirstName + ' ' + result.contactLastName,
+        approved_billing: (item.BillingInfos.reduce((acc, curr) => (acc + curr.approved), 0)*item.billingRate).toFixed(2) + ' ' + item.billingCurrency, 
+        approved_reimbursement: (item.BillingInfos.reduce((acc, curr) => (acc + curr.approved), 0)*result.RCExchangeRate).toFixed(2) + ' ' + result.reimbusementCurrency
+      }))
+
+      MailConfig.ViewOption(gmailTransport,hbs);
+      const contactName = result.contactFirstName + ' ' + result.contactLastName
+      const patientName = result.patientFirstName + ' ' + result.patientLastName
+      const reason = "<p>this si the because</p>"
+      console.log(result)
+      var email = {
+        from: MailConfig.from, // sender address
+        to: setting.forwardEmail+','+result.contactEmail, 
+        subject: 'Your claim has been approved', // Subject line
+        template: 'decision_approved',
+        context: {
+          ucn:result.id,
+          visits:visits,
+          contactName:contactName,
+          patientName: contactName===patientName?'your':(patientName+"'s"),
+          cause: result.cause,
+          email: "tariqul.islam.rony@gmail.com",
+          address: req.body.claimID,
+          status: status, 
+          reason: reason, 
+          bankName:result.bankName, 
+          bankAddress:result.bankAddress,
+          accountHolderName:result.accountHoldersName, 
+          accountNumber:result.bankAccountNumber, 
+          swift:result.swift, 
+          iban:result.ibanCodeSortCode,
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      }
+      var emailRes = await gmailTransport.sendMail(email)
+      res.send(emailRes)
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(error)
+  }
+
+}))
+
+
+
+router.get('/decision_declined', awaitErorrHandlerFactory(async (req, res, next) => {
+  try {
+    const claim = await models.ClaimInfo.findByPk('RIH/YYYY/XX/11111111-15', {
+      include: [{
+        model:models.ClaimInfoVisits,
+        attributes: ['id', 'dateOfAdmissionVisit','hospitalOrClinicName','billingCurrency', 'billingRate'],
+        include: [{
+          model:models.BillingInfo,
+          attributes: ['value', 'approved'],
+        }],
+      }],
+    })
+    const setting = await models.SharedSettings.findOne({limit: 1,order: [ [ 'createdAt', 'DESC' ]]})
+    if(!(claim && setting)) {
+      res.status(500).send({error: 'no record'})
+    } else {
+      const result = claim.toJSON()
+      const status = result.status
+      let visits = result.ClaimInfoVisits.map(item => ({
+        id:item.id, hospitalOrClinicName:item.hospitalOrClinicName, 
+        dateOfAdmissionVisit: moment(item.dateOfAdmissionVisit).format('DD MMM YYYY'),
+        patient: result.contactFirstName + ' ' + result.contactLastName,
+        approved_billing: (item.BillingInfos.reduce((acc, curr) => (acc + curr.approved), 0)*item.billingRate).toFixed(2) + ' ' + item.billingCurrency, 
+        approved_reimbursement: (item.BillingInfos.reduce((acc, curr) => (acc + curr.approved), 0)*result.RCExchangeRate).toFixed(2) + ' ' + result.reimbusementCurrency
+      }))
+
+      MailConfig.ViewOption(gmailTransport,hbs);
+      const contactName = result.contactFirstName + ' ' + result.contactLastName
+      const patientName = result.patientFirstName + ' ' + result.patientLastName
+      const reason = "<p>this si the because</p>"
+      console.log(result)
+      var email = {
+        from: MailConfig.from, // sender address
+        to: setting.forwardEmail+','+result.contactEmail, 
+        subject: 'Your claim has been assessed', // Subject line
+        template: 'decision_declined',
+        context: {
+          ucn:result.id,
+          visits:visits,
+          contactName:contactName,
+          patientName: contactName===patientName?'your':(patientName+"'s"),
+          cause: result.cause,
+          email: "tariqul.islam.rony@gmail.com",
+          address: req.body.claimID,
+          status: status, 
+          reason: reason, 
+          bankName:result.bankName, 
+          bankAddress:result.bankAddress,
+          accountHolderName:result.accountHoldersName, 
+          accountNumber:result.bankAccountNumber, 
+          swift:result.swift, 
+          iban:result.ibanCodeSortCode,
+        },
+        attachments: [{
+            filename: 'a.png',
+            path: __dirname +'/../views/img/a.png',
+            cid: 'unique@nodemailer.com' //same cid value as in the html img src
+        }]
+      }
+      var emailRes = await gmailTransport.sendMail(email)
+      res.send(emailRes)
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(error)
+  }
+
 }))
 
 

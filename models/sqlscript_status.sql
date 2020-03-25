@@ -75,6 +75,10 @@ UPDATE Dirties SET status = 'Approved. To be Paid', billingTotalUSD = 300, claim
 UPDATE Dirties SET billingCurrency='Euro', billingTotalUSD = approved_reimbusement WHERE id = 'C726';
 UPDATE Dirties SET billingCurrency='Euro', billingTotalUSD = approved_reimbusement WHERE id = 'C1008';
 
+
+
+
+
 /*YOU CAN NOT RUN SECOND TIME*/
 /* UPDATE Dirties SET [39] = approved_USD - claimedTotalUSD,  claimedTotalUSD = approved_USD WHERE id = 'B212'; */
 UPDATE Dirties SET [39] = approved_USD - claimedTotalUSD,  claimedTotalUSD = approved_USD WHERE id = 'B224'; 
@@ -86,3 +90,7 @@ UPDATE Dirties SET policyNumber=patientName, patientName=policyNumber WHERE id =
 
 
 UPDATE Dirties SET Reject_USD = (claimedTotalUSD - approved_USD)
+
+
+
+

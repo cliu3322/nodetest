@@ -48,7 +48,7 @@
       float: none !important;
       vertical-align: top;
       }
-      .ie-container .email-col-100, .ie-container .email-row, [owa] .email-col-100, [owa] .email-row { width: 500px !important; }
+      .ie-container .email-col-100, .ie-container .email-row, [owa] .email-col-100, [owa] .email-row { width: 800px !important; }
       .ie-container .email-col-17, [owa] .email-col-17 { width: 85px !important; }
       .ie-container .email-col-25, [owa] .email-col-25 { width: 125px !important; }
       .ie-container .email-col-33, [owa] .email-col-33 { width: 165px !important; }
@@ -122,12 +122,12 @@
                <tr style="background-color: transparent;">
                   <![endif]-->
                   <!--[if (mso)|(IE)]>
-                  <td align="center" width="500" style="width: 500px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top">
+                  <td align="center" width="800" style="width: 800px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top">
                      <![endif]-->
-                     <div style="width:500px; text-align: center;display: block;margin-left: auto;margin-right: auto;">
+                     <div style="width:800px; text-align: center;display: block;margin-left: auto;margin-right: auto;">
                         <div style="background-color: #081B56">
                            <p style="font-size: 15px; line-height: 100%; text-align: center;color:white">REGENCY  FOR  EXPATS  CLAIMS  HANDLING</p>
-                           <p style="font-size: 34px; line-height: 280%; text-align: center;color: white"><strong>Your claim has been registered</strong></p>
+                           <p style="font-size: 34px; line-height: 280%; text-align: center;color: white"><strong>Your claim has been approved</strong></p>
                            <p style="font-size: 14px; line-height: 170%;color: white"><span style="font-size: 14px; line-height: 23.8px; font-family: Lato, sans-serif;">Your unique claims number:&nbsp;&nbsp;<strong>UCN: {{ucn}}</strong></span></p>
                         </div>
 
@@ -147,7 +147,7 @@
                                                                            <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
                                                                               <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 12px; line-height: 16.8px;">Dear {{contactName}},</span></p>
                                                                               <p style="font-size: 14px; line-height: 140%;">&nbsp;</p>
-                                                                              <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 12px; line-height: 16.8px;">Thank you for submitting your claim to us. This email is to confirm that we have received your claim and it has been assigned to an assessor immediately for evaluation.</span></p>
+                                                                              <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 12px; line-height: 16.8px;">Thank you for {{patientName}} claim. I’m really pleased to let you know it’s been approved.</span></p>
                                                                            </div>
                                                                         </td>
                                                                      </tr>
@@ -158,7 +158,18 @@
                                                                      <tr>
                                                                         <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
                                                                            <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
-                                                                              <p style="line-height: 140%; font-size: 14px;"><strong><span style="font-size: 12px; line-height: 16.8px;">This claim relates to: {{cause}}</span></strong></p>
+                                                                              <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">Your claim’s {{status}} . </span></p>
+                                                                           </div>
+                                                                        </td>
+                                                                     </tr>
+                                                                  </tbody>
+                                                               </table>
+                                                               <table id="u_content_value" class="u_content_text" style="font-family:'Lato',sans-serif;" role="presentation" cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                                  <tbody>
+                                                                     <tr>
+                                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
+                                                                           <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                              <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">{{{reason}}}</span></p>
                                                                            </div>
                                                                         </td>
                                                                      </tr>
@@ -174,17 +185,33 @@
                            </div>
                         </div>
                         <div class="email-row-container" style="padding: 0px;background-color: transparent">
+
                            <div style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;" class="email-row">
                               <div class="email-col email-col-100" style="max-width: 320px;min-width: 500px;display: table-cell;vertical-align: top;">
+                              <table id="u_table_title" class="u_content_text" style="font-family:'Lato',sans-serif;" role="presentation" cellpadding="0" cellspacing="0" width="100%" border="0">
+                                 <tbody>
+                                    <tr>
+                                       <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
+                                          <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                             <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">Claim Details</span></p>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
                               <table style="width: 100%;">
                                  <tr style="background-color: #dddddd;">
-                                    <th>DATE OF VISIT</th>
-                                    <th>PLACE OF VISIT</th>
+                                    <th>Date of visit</th>
+                                    <th>Place of visit</th>
+                                    <th>Approved Amount Billing Currency</th>
+                                    <th>Reimbursed Amount</th>
                                  </tr>
                                  {{#each visits as |visit|}}
                                     <tr style="background-color: #dddddd;">
                                        <td align="center">{{visit.dateOfAdmissionVisit}}</td>
                                        <td align="center">{{visit.hospitalOrClinicName}}</td>
+                                       <td align="center">{{visit.approved_billing}}</td>
+                                       <td align="center">{{visit.approved_reimbursement}}</td>
                                     </tr>
                                  {{/each}}
                               </table>
@@ -215,13 +242,60 @@
                                                                   <tr>
                                                                      <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
                                                                         <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
-                                                                           <p style="line-height: 140%; font-size: 14px;"><strong><span style="font-size: 12px; line-height: 16.8px;">Your Plan:</span></strong></p>
-                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">Your claim will be assessed using the terms and conditions of your (plan type) policy. Your policy handbook includes the details, please make sure you have read and understood it. If you do not please let us know so we can help.</span></p>
+                                                                           <p style="line-height: 140%; font-size: 14px;"><strong><span style="font-size: 12px; line-height: 16.8px;">Cause:</span></strong></p>
+                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">{{cause}}</span></p>
                                                                         </div>
                                                                      </td>
                                                                   </tr>
                                                                </tbody>
                                                             </table>
+                                                                                    <div class="email-col email-col-100" style="max-width: 320px;min-width: 500px;display: table-cell;vertical-align: top;">
+                           <div style="width: 100% !important;">
+                              <!--[if (!mso)&(!IE)]><!-->
+                              <div style="padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;">
+                                 <!--<![endif]-->
+                                 <table id="u_content_text_4" class="u_content_text" style="font-family:'Lato',sans-serif;" role="presentation" cellpadding="0" cellspacing="0" width="100%" border="0">
+                                    <tbody>
+                                       <tr>
+                                          <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
+                                             <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 12px; line-height: 16.8px;">Please confirm your reimbursement details by replying to this email. We need your XXX to make the transfer:</span></p>
+                                             </div>
+                                          </td>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+                                 <table style="width: 100%;">
+                                    <tr style="background-color: #dddddd;" align="left">
+                                       <th>Bank Name:</th>
+                                       <th>{{bankName}}</th>
+                                    </tr>
+                                    <tr style="background-color: #dddddd;" align="left">
+                                       <th>Bank Address:</th>
+                                       <th>{{bankAddress}}</th>
+                                    </tr>
+                                    <tr style="background-color: #dddddd;" align="left">
+                                       <th>Acc Holder’s Name:</th>
+                                       <th>{{accountHolderName}}</th>
+                                    </tr>
+                                    <tr style="background-color: #dddddd;"align="left">
+                                       <th>Account Number:</th>
+                                       <th>{{accountNumber}}</th>
+                                    </tr>
+                                    <tr style="background-color: #dddddd;"align="left">
+                                       <th>SWIFT Code:</th>
+                                       <th>{{swift}}</th>
+                                    </tr>
+                                    <tr style="background-color: #dddddd;" align="left">
+                                       <th>IBAN/Sort Code:</th>
+                                       <th>{{iban}}</th>
+                                    </tr>
+                                 </table>
+                                 <!--[if (!mso)&(!IE)]><!-->
+                              </div>
+                              <!--<![endif]-->
+                           </div>
+                        </div>
                                                             <!--[if (!mso)&(!IE)]><!-->
                                                          </div>
                                                          <!--<![endif]-->
@@ -240,53 +314,7 @@
                               </div>
                            </div>
                         </div>
-                        <div class="email-row-container" style="padding: 0px;background-color: transparent">
-                           <div style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;" class="email-row">
-                              <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
-                                 <!--[if (mso)|(IE)]>
-                                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                                    <tr>
-                                       <td style="padding: 0px;background-color: transparent;" align="center">
-                                          <table cellpadding="0" cellspacing="0" border="0" style="width:500px;">
-                                             <tr style="background-color: transparent;">
-                                                <![endif]-->
-                                                <!--[if (mso)|(IE)]>
-                                                <td align="center" width="496" style="width: 496px;padding: 0px;border-top: 2px solid #20294f;border-left: 2px solid #20294f;border-right: 2px solid #20294f;border-bottom: 2px solid #20294f;" valign="top">
-                                                   <![endif]-->
-                                                   <div class="email-col email-col-100" style="max-width: 320px;min-width: 500px;display: table-cell;vertical-align: top;">
-                                                      <div style="width: 100% !important;">
-                                                         <!--[if (!mso)&(!IE)]><!-->
-                                                         <div style="padding: 0px;border-top: 2px solid #20294f;border-left: 2px solid #20294f;border-right: 2px solid #20294f;border-bottom: 2px solid #20294f;">
-                                                            <!--<![endif]-->
-                                                            <table id="u_content_text_18" class="u_content_text" style="font-family:'Lato',sans-serif;" role="presentation" cellpadding="0" cellspacing="0" width="100%" border="0">
-                                                               <tbody>
-                                                                  <tr>
-                                                                     <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Lato',sans-serif;" align="left">
-                                                                        <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
-                                                                           <p style="line-height: 140%; font-size: 14px;"><strong><span style="font-size: 12px; line-height: 16.8px;">FRAUD WARNING:&nbsp;</span></strong><span style="font-size: 12px; line-height: 16.8px;">If any claim is in any respect fraudulent or unfounded, all benefits paid and/or payablein relation to that claim shall be forfeited and (if appropriate) recoverable. In addition, allcover in respect of the insured persons shall be cancelled void from the date of entry.Fraud is a crime and may be reported to legal authorities, industry associations and partners.</span></p>
-                                                                        </div>
-                                                                     </td>
-                                                                  </tr>
-                                                               </tbody>
-                                                            </table>
-                                                            <!--[if (!mso)&(!IE)]><!-->
-                                                         </div>
-                                                         <!--<![endif]-->
-                                                      </div>
-                                                   </div>
-                                                   <!--[if (mso)|(IE)]>
-                                                </td>
-                                                <![endif]-->
-                                                <!--[if (mso)|(IE)]>
-                                             </tr>
-                                          </table>
-                                       </td>
-                                    </tr>
-                                 </table>
-                                 <![endif]-->
-                              </div>
-                           </div>
-                        </div>
+
                         <div class="email-row-container" style="padding: 0px;background-color: transparent">
                            <div style="Margin: 0 auto;min-width: 320px;max-width: 500px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;" class="email-row">
                               <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
@@ -310,9 +338,7 @@
                                                                   <tr>
                                                                      <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 10px 0px;font-family:'Lato',sans-serif;" align="left">
                                                                         <div style="color: #20294f; line-height: 140%; text-align: left; word-wrap: break-word;">
-                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">We will get back in touch if we need any additional information and will also update you with the progress.</span></p>
-                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">&nbsp;</span></p>
-                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">Should you need further assistance, don't hestitate to get contact us by return email and we will be very happy to help you.</span></p>
+                                                                           <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">We are delighted that you’ve made good use of your Regency for Expats policy benefits and look forward to assisting you again if need be. Don’t hesitate to get in touch if we can help with anything else.</span></p>
                                                                            <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">&nbsp;</span></p>
                                                                            <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">Thank you very much.</span></p>
                                                                            <p style="line-height: 140%; font-size: 14px;"><span style="font-size: 12px; line-height: 16.8px;">&nbsp;</span></p>

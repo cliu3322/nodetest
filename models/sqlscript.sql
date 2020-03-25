@@ -7,7 +7,7 @@ SELECT SUM([1]+[2]+[3]+[4]+[5]+[6]+[7]+[8]+[9]+
   FROM [claim].[dbo].Dirties where id =  'B173'
 
   SELECT TOP (1000) *
-  FROM [claim].[dbo].Dirties where id =  'C726'
+  FROM [claim].[dbo].Dirties where id =  'S4827'
 
   SELECT (claimedTotalUSD-([1]+[3]+[7]))
   FROM [claim].[dbo].Dirties where id =  'G4977'

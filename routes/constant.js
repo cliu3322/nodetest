@@ -395,7 +395,7 @@ router.get('/validation', async function(req, res, next) {
 
 
               if(!status){
-                console.log(status, item.id)
+                console.log('status missing', item.id)
               }
             
 
@@ -549,67 +549,72 @@ router.get('/validation', async function(req, res, next) {
 
                   //console.log('status cp', item.id, status)
                 } else {
-                  console.log('billingInfo status', item.id, status)
+                  console.log('billingInfo status', item.id)
                 }
                 billingInfos.push({billingSubCat:i, value:item[i], approved:approved})
               }
             }
             
-            // //ca validation
-            // if(status === 'ca') {
-            //   if(Math.abs(total.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
-            //     console.log('ca total != claimedTotalUSD', item.id, total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.approved_USD.toFixed(2))
-            //   }
-            //   if(Math.abs(item.approved_USD.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
-            //     console.log('ca approved_USD != claimedTotalUSD', item.id, total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.approved_USD.toFixed(2))
-            //   }
-            // }
+            //ca validation
+            if(status === 'ca') {
+              if(!item.claimedTotalUSD) {
+                console.log('claimedTotalUSD missing', item.id)
+              } else if(Math.abs(total.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
+                console.log('ca total != claimedTotalUSD', item.id, total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.approved_USD.toFixed(2))
+              }
 
-            // if(status === 'cp') {
-            //   if(total === null || total === undefined){
-            //     console.log('total null',item.id, total)
-            //   } else if(item.claimedTotalUSD === null) {
-            //     console.log('claimedTotalUS null',item.id, item.claimedTotalUSD)
-            //   } else if(item.approved_USD === null) {
-            //     console.log('approved_USD null',item.id, item.approved_USD, status)
-            //   } else if(Math.abs(total.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
-            //     console.log('total not match claim', total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.id)
-            //   }
-            // }
-            // if(parsedBillingResult=== parsedReimbursementResult && Math.abs(BillingExchangeRate - RCExchangeRate)>RCExchangeRate*0.1) {
-            //   console.log('EXRate wrong', item.id, BillingExchangeRate,RCExchangeRate , parsedBillingResult)
-            // }
-            // if(status !== 'cd'){
-            //   if(parsedBillingResult=== parsedReimbursementResult && Math.abs((item.billingTotalUSD/item.claimedTotalUSD) - (item.approvedReimbursement/item.approved_USD))>RCExchangeRate*0.01) {
-            //     console.log('EXRate wrong', item.id, BillingExchangeRate,RCExchangeRate , parsedBillingResult)
-            //   }
+              if(!item.approved_USD) {
+                console.log('approved_USD missing', item.id)
+              } else if(Math.abs(item.approved_USD.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
+                console.log('ca approved_USD != claimedTotalUSD', item.id, total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.approved_USD.toFixed(2))
+              }
+            }
+
+            if(status === 'cp') {
+              if(total === null || total === undefined){
+                console.log('total null',item.id, total)
+              } else if(item.claimedTotalUSD === null) {
+                console.log('claimedTotalUS null',item.id, item.claimedTotalUSD)
+              } else if(item.approved_USD === null) {
+                console.log('approved_USD null',item.id, item.approved_USD, status)
+              } else if(Math.abs(total.toFixed(2) - item.claimedTotalUSD.toFixed(2))>0.1) {
+                console.log('total not match claim', total.toFixed(2), item.claimedTotalUSD.toFixed(2), item.id)
+              }
+            }
+            if(parsedBillingResult=== parsedReimbursementResult && Math.abs(BillingExchangeRate - RCExchangeRate)>RCExchangeRate*0.1) {
+              console.log('EXRate wrong', item.id, BillingExchangeRate,RCExchangeRate , parsedBillingResult)
+            }
+            if(status !== 'cd'){
+              if(parsedBillingResult=== parsedReimbursementResult && Math.abs((item.billingTotalUSD/item.claimedTotalUSD) - (item.approvedReimbursement/item.approved_USD))>RCExchangeRate*0.01) {
+                console.log('EXRate wrong', item.id, BillingExchangeRate,RCExchangeRate , parsedBillingResult)
+              }
   
-            // }
-            // if(!(parsedReimbursementResult||parsedBillingResult)) {
-            //   console.log(item.id)
-            // }
+            }
+            if(!(parsedReimbursementResult||parsedBillingResult)) {
+              console.log(item.id)
+            }
 
 
 
-            // const percentage = 0.5
-            // if(item.createdAt > new Date('2019-02-01 00:00:00.0000000 +00:00') ) {
-            //   if(parsedReimbursementResult !== 'CHF') {
-            //     let comparedRatedRC = (await models.ExchangeRate.findOne({where: {code:parsedReimbursementResult}})).rate
-            //     if(Math.abs(RCExchangeRate -  comparedRatedRC) > RCExchangeRate*percentage || Math.abs(RCExchangeRate -  comparedRatedRC) > comparedRatedRC*percentage) {
-            //       console.log('RCExchangeRate wrong', item.id,RCExchangeRate, comparedRatedRC, parsedReimbursementResult)
-            //     } else if(Math.log(RCExchangeRate)*Math.log(comparedRatedRC)<0) {
-            //       console.log('RCExchangeRate signWrong', item.id,RCExchangeRate, comparedRatedRC, parsedReimbursementResult)
-            //     }
-            //   }
-            //   if(parsedBillingResult !== 'CHF') {
-            //     let comparedRatedBilling = (await models.ExchangeRate.findOne({where: {code:parsedBillingResult}})).rate
-            //     if(Math.abs(BillingExchangeRate -  comparedRatedBilling) > BillingExchangeRate*percentage || Math.abs(BillingExchangeRate -  comparedRatedBilling) > comparedRatedBilling*percentage) {
-            //       console.log('BillingExchangeRate wrong', item.id,BillingExchangeRate, comparedRatedBilling, parsedBillingResult)
-            //     } else if(Math.log(BillingExchangeRate)*Math.log(comparedRatedBilling)<0) {
-            //       console.log('BillingExchangeRate signWrong', item.id,BillingExchangeRate, comparedRatedBilling, parsedBillingResult)
-            //     }
-            //   }
-            // }
+            const percentage = 0.5
+            if(item.createdAt > new Date('2019-02-01 00:00:00.0000000 +00:00') ) {
+              if(parsedReimbursementResult !== 'CHF') {
+                let comparedRatedRC = (await models.ExchangeRate.findOne({where: {code:parsedReimbursementResult}})).rate
+                if(Math.abs(RCExchangeRate -  comparedRatedRC) > RCExchangeRate*percentage || Math.abs(RCExchangeRate -  comparedRatedRC) > comparedRatedRC*percentage) {
+                  console.log('RCExchangeRate wrong', item.id,RCExchangeRate, comparedRatedRC, parsedReimbursementResult)
+                } else if(Math.log(RCExchangeRate)*Math.log(comparedRatedRC)<0) {
+                  console.log('RCExchangeRate signWrong', item.id,RCExchangeRate, comparedRatedRC, parsedReimbursementResult)
+                }
+              }
+              if(parsedBillingResult !== 'CHF') {
+                let comparedRatedBilling = (await models.ExchangeRate.findOne({where: {code:parsedBillingResult}})).rate
+                if(Math.abs(BillingExchangeRate -  comparedRatedBilling) > BillingExchangeRate*percentage || Math.abs(BillingExchangeRate -  comparedRatedBilling) > comparedRatedBilling*percentage) {
+                  console.log('BillingExchangeRate wrong', item.id,BillingExchangeRate, comparedRatedBilling, parsedBillingResult)
+                } else if(Math.log(BillingExchangeRate)*Math.log(comparedRatedBilling)<0) {
+                  console.log('BillingExchangeRate signWrong', item.id,BillingExchangeRate, comparedRatedBilling, parsedBillingResult)
+                }
+              }
+            }
             
 
           }
