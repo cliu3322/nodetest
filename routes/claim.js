@@ -103,7 +103,6 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
   var response = {};
   var query = {}
   try {
-    console.log('req.query', req.query)
     if(req.query.or) {
       let newQuery = req.query.or.map(function(item) {
         return JSON.parse(item)
@@ -120,7 +119,6 @@ router.get('/claims', awaitErorrHandlerFactory(async (req, res, next) => {
       //either replace by https://www.npmjs.com/package/expression-eval, or parse the url yourself. I put this way to save time for the first version of claim system demo
       query= eval(req.query.query)[0]
     }
-    console.log('query', query)
     var claims = await models.ClaimInfo.findAll({
       where: query,
       include: [{
