@@ -167,7 +167,7 @@ router.post('/decision', async function(req, res, next) {
       if(req.body.status.decisionStatus === 'approved') {
         template = 'decision_approved'
         subject = 'Your claim has been approved'
-      } else if (req.body.status.decisionStatus === 'declined') {
+      } else if (req.body.status.decisionStatus === 'disagree') {
         template = 'decision_declined'
         subject =  'Your claim has been assessed'
       } else {
