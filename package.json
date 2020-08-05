@@ -22,7 +22,7 @@
     "crawler": "^1.2.1",
     "debug": "~2.6.9",
     "express": "~4.16.1",
-    "express-fileupload": "^1.1.5",
+    "express-fileupload": "^1.1.9",
     "formidable": "^1.2.1",
     "html-table-to-json": "^0.4.1",
     "http-errors": "~1.6.3",
