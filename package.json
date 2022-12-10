@@ -21,7 +21,7 @@
     "cors": "^2.8.4",
     "crawler": "^1.2.1",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "express": "~4.17.3",
     "express-fileupload": "^1.1.5",
     "formidable": "^1.2.1",
     "html-table-to-json": "^0.4.1",
